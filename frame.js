@@ -59,20 +59,6 @@ class Cube_Outline extends Shape {
         for(let i=0;i<24;i++){
             this.arrays.color.push(color);
         }
-        // this.arrays.color = [
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        //     color(1,0,0,1), color(1,0,0,1),
-        // ];
         this.indices = false;
         // When a set of lines is used in graphics, you should think of the list entries as
         // broken down into pairs; each pair of vertices will be drawn as a line segment.
@@ -80,19 +66,7 @@ class Cube_Outline extends Shape {
     }
 }
 
-class Cube_Single_Strip extends Shape {
-    constructor() {
-        super("position", "normal");
-        // TODO (Requirement 6)
-        this.arrays.position = Vector3.cast(
-            [1,1,1],[1,1,-1],[1,-1,1],[1,-1,-1],[-1,1,1],[-1,1,-1],[-1,-1,1],[-1,-1,-1]);
-        this.arrays.normal = this.arrays.position;
-        // Arrange the vertices into a square shape in texture space too:
-        this.indices = [0,1,2,3,6,7,3,5,1,4,0,2,4,6,5,7];
-    }
-}
-
-export class Tetris extends Scene {
+export class Frame extends Scene {
     /**®
      * This Scene object can be added to any display canvas.
      * We isolate that code so it can be experimented with on its own.
@@ -107,6 +81,7 @@ export class Tetris extends Scene {
             'cube': new Cube(),
             'outline': new Cube_Outline(color(1,1,1,1)),
             'endline': new Cube_Outline(color(1,0,0,1)),
+            'base': new Cube_Outline(color(0.6,0.6,0.6,1)),
             'strip': new Cube_Single_Strip(),
         };
 
@@ -117,39 +92,6 @@ export class Tetris extends Scene {
         };
         // The white material and basic shader are used for drawing the outline.
         this.white = new Material(new defs.Basic_Shader());
-    }
-
-    draw_box(context, program_state, model_transform, color) {
-        // TODO:  Helper function for requirement 3 (see hint).
-        //        This should make changes to the model_transform matrix, draw the next box, and return the newest model_transform.
-        // Hint:  You can add more parameters for this function, like the desired color, index of the box, etc.
-        const t = program_state.animation_time/1000;
-        let angle = 0.05*Math.PI;
-        let rotation = 0;
-        if(!this.sflag)
-            rotation = -1 * (angle/2 + angle/2*Math.sin(2*Math.PI*t));
-        else
-            rotation = -1 * angle;
-
-        if(!this.oflag) {
-            if (!this.tflag)
-                this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: color}));
-            else
-                this.shapes.strip.draw(context, program_state, model_transform, this.materials.plastic.override({color: color}), "TRIANGLE_STRIP");
-        }
-        else
-            this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
-
-        this.tflag = !this.tflag;
-
-        model_transform = model_transform
-            .times(Mat4.scale(1,2/3,1))
-            .times(Mat4.translation(0,3,0)) //translation
-            .times(Mat4.translation(1,-1.5,0))
-            .times(Mat4.rotation(rotation, 0,0,1))
-            .times(Mat4.translation(-1,1.5,0))
-            .times(Mat4.scale(1,1.5,1));
-        return model_transform;
     }
 
     draw_frame(context, program_state){
@@ -172,11 +114,10 @@ export class Tetris extends Scene {
         let base = Mat4.identity().times(Mat4.translation(0,-1,0)).times(Mat4.scale(0.5,0.01,0.5)); // the flattened base
         for(let z = -10; z <= 11; z++){
             for(let x = -4; x <= 23; x++){
-                this.shapes.outline.draw(context, program_state, base.times(Mat4.translation(2*x-1,0,2*z-1)), this.white, "LINES");
+                this.shapes.base.draw(context, program_state, base.times(Mat4.translation(2*x-1,0,2*z-1)), this.white, "LINES");
                 // this.shapes.cube.draw(context, program_state, base.times(Mat4.translation(2*x,0,2*z)), this.materials.plastic.override({diffusivity:0}));
             }
         }
-
     }
 
     make_control_panel() {
@@ -192,24 +133,32 @@ export class Tetris extends Scene {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
-            program_state.set_camera(Mat4.translation(0, -15, -50));
+            program_state.set_camera(Mat4.translation(-10, -15, -50));
         }
 
         if(this.attached !== undefined) {
             let desired = this.attached();
             if(desired === "origin"){
-                desired = Mat4.translation(0, -15, -50);
+                desired = Mat4.translation(-10, -15, -50);
             }
             desired = desired.map((x,i) => Vector.from( program_state.camera_inverse[i]).mix(x, 0.1));
             program_state.set_camera(desired);
         }
+
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
 
         // *** Lights: *** Values of vector or point lights.
         const light_position = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+
+        let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
+
         this.draw_frame(context, program_state);
+
+        let m = Mat4.identity().times(Mat4.translation(10,30,0)).times(Mat4.translation(0,-t,0));
+        this.shapes.cube.draw(context, program_state,m, this.materials.plastic);
+
         // TODO:  Draw your entire scene here.  Use this.draw_box( graphics_state, model_transform ) to call your helper.
     }
 }
