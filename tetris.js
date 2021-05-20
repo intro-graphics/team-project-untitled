@@ -11,6 +11,7 @@ export class Body {
     constructor(shape, material, size) {
         Object.assign(this,
             {shape, material, size})
+        this.num_rotation = 0;
     }
 
     // (within some margin of distance).
@@ -143,6 +144,7 @@ export class Simulation extends Scene {
         this.live_string(box => {
             box.textContent = this.steps_taken + " timesteps were taken so far."
         });
+
     }
 
     display(context, program_state) {
@@ -167,7 +169,7 @@ export class Test_Data {
         this.textures = {
             rgb: new Texture("assets/rgb.jpg"),
             earth: new Texture("assets/earth.gif"),
-            grid: new Texture("assets/grid.png"),
+            // grid: new Texture("assets/grid.png"),
             stars: new Texture("assets/stars.png"),
             text: new Texture("assets/text.png"),
         }
@@ -283,8 +285,66 @@ export class Test_Demo extends Simulation {
         this.shapes.square.draw(context, program_state, Mat4.translation(0, -10, 0)
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(50, 50, 1)),
             this.material.override(this.data.textures.earth));
-        let model_transform = Mat4.identity()
-        //this.shapes.jshape.draw(context, program_state, model_transform, this.materials.plastic);
+        // let model_transform = Mat4.identity()
+        // this.shapes.jshape.draw(context, program_state, model_transform, this.materials.plastic);
+    }
+
+    make_control_panel() {
+        super.make_control_panel();
+
+        this.new_line();
+        this.key_triggered_button("Rotate", ["i"], () => {
+            let currentBody = this.bodies[this.bodies.length-1];
+            let model_transform = currentBody.drawn_location.times(Mat4.rotation(Math.PI/2,0,0,1));
+            currentBody.num_rotation = (currentBody.num_rotation + 1) % 4;
+            console.log(currentBody.num_rotation);
+            currentBody.emplace(model_transform,currentBody.linear_velocity,0);
+        });
+        this.new_line();
+        this.key_triggered_button("left", ["j"], () => {
+            let currentBody = this.bodies[this.bodies.length-1];
+            let model_transform = currentBody.drawn_location;
+            // if the body has been rotated before, first rotate back by -theta and do translation, then rotate back theta angle
+            if(currentBody.num_rotation !== 0){
+                let rotate_back_angle = - currentBody.num_rotation * Math.PI/2;
+                model_transform = model_transform.times(Mat4.rotation(rotate_back_angle, 0, 0, 1));
+            }
+            model_transform = model_transform.times(Mat4.translation(-2,0,0));
+            if(currentBody.num_rotation !== 0){
+                let rotate_back_angle = currentBody.num_rotation * Math.PI/2;
+                model_transform = model_transform.times(Mat4.rotation(rotate_back_angle, 0, 0, 1));
+            }
+            currentBody.emplace(model_transform,currentBody.linear_velocity,0);
+        });
+        this.key_triggered_button("right", ["l"], () => {
+            let currentBody = this.bodies[this.bodies.length-1];
+            let model_transform = currentBody.drawn_location;
+            if(currentBody.num_rotation !== 0){
+                let rotate_back_angle = - currentBody.num_rotation * Math.PI/2;
+                model_transform = model_transform.times(Mat4.rotation(rotate_back_angle, 0, 0, 1));
+            }
+            model_transform = model_transform.times(Mat4.translation(2,0,0));
+            if(currentBody.num_rotation !== 0){
+                let rotate_back_angle = currentBody.num_rotation * Math.PI/2;
+                model_transform = model_transform.times(Mat4.rotation(rotate_back_angle, 0, 0, 1));
+            }
+            currentBody.emplace(model_transform,currentBody.linear_velocity,0);
+        });
+        this.key_triggered_button("down", ["k"], () => {
+            let currentBody = this.bodies[this.bodies.length-1];
+            if(currentBody.center[1] < -8) return;
+            let model_transform = currentBody.drawn_location;
+            if(currentBody.num_rotation !== 0){
+                let rotate_back_angle = - currentBody.num_rotation * Math.PI/2;
+                model_transform = model_transform.times(Mat4.rotation(rotate_back_angle, 0, 0, 1));
+            }
+            model_transform = model_transform.times(Mat4.translation(0,-1,0));
+            if(currentBody.num_rotation !== 0){
+                let rotate_back_angle = currentBody.num_rotation * Math.PI/2;
+                model_transform = model_transform.times(Mat4.rotation(rotate_back_angle, 0, 0, 1));
+            }
+            currentBody.emplace(model_transform,currentBody.linear_velocity,0);
+        });
     }
 
     show_explanation(document_element) {
