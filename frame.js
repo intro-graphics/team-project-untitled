@@ -156,8 +156,8 @@ export class Frame extends Scene {
 
         this.draw_frame(context, program_state);
 
-        let m = Mat4.identity().times(Mat4.translation(10,30,0)).times(Mat4.translation(0,-t,0));
-        this.shapes.cube.draw(context, program_state,m, this.materials.plastic);
+        // let m = Mat4.identity().times(Mat4.translation(10,30,0)).times(Mat4.translation(0,-t,0));
+        // this.shapes.cube.draw(context, program_state,m, this.materials.plastic);
 
         // TODO:  Draw your entire scene here.  Use this.draw_box( graphics_state, model_transform ) to call your helper.
     }
