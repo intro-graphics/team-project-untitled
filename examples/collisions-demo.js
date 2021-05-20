@@ -292,7 +292,7 @@ export class Collision_Demo extends Simulation {
         this.collider_selection = Math.max(this.collider_selection - 1, 0)
     }
 
-    update_state(dt, num_bodies = 40) {
+    update_state(dt, num_bodies = 10) {
         // update_state():  Override the base time-stepping code to say what this particular
         // scene should do to its bodies every frame -- including applying forces.
         // Generate moving bodies:
