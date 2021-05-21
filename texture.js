@@ -16,6 +16,7 @@ export class Jshape extends Shape{
           [-1, 3, -1], [-1, 3, 1]
         );
         this.arrays.normal = this.arrays.position;
+        this.pos = [[-1, -1], [-1,0], [0, 0], [1,0]]
 //         this.indices = [0, 1, 3, 13, 11, 12, 10, 0, 2, 3, 5, 7, 6, 8, 4, 2, 5, 4, 6, 5, 7, 3, 9, 8, 7, 6, 4, 2, 8, 3, 2, 1, 0, 13, 12];
         // this.indices = [0, 1, 3, 11, 9, 8, 6, 4, 7, 5, 3, 4, 2, 6, 8, 7, 9, 3, 11, 1, 10, 0, 2, 3, 4, 2, 6, 8];
         this.indices = [0, 1, 3, 0, 3, 2, 1, 3, 11, 3, 11, 9, 3, 9, 7, 3, 7, 5,
@@ -34,6 +35,7 @@ export class Jshape extends Shape{
 export class Lout extends Shape{
     constructor(){
         super("position", "color");
+        
         this.arrays.position = Vector3.cast(
             [-3, 3, -1], [-3, 3, 1],
             [-3, 3, -1], [-1, 3, -1],
@@ -81,6 +83,7 @@ export class Lout extends Shape{
 export class Lshape extends Shape{
     constructor() {
         super("position", "normal");
+        this.pos = [[-1, 0], [1,0], [0, 0], [1,-1]]
         this.arrays.position = Vector3.cast(
           [-3, 1, -1], [-3, 1, 1],
           [-3, -1, -1], [-3, -1, 1],

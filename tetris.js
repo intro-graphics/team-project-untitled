@@ -1,8 +1,15 @@
 import {defs, tiny} from './examples/common.js';
-import {Jshape} from './texture.js'
+import {Jshape,Lshape,Lout,squareShape,Ishape} from './texture.js'
 
 // Pull these names into this module's scope for convenience:
 const {vec3, unsafe3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene} = tiny;
+
+
+let nRows = 17;
+let nCols = 18;
+let EMPTY = -1
+let BORDER = -2
+let FILLED = 99
 
 export class Body {
     // **Body** can store and update the properties of a 3D body that incrementally
@@ -12,6 +19,14 @@ export class Body {
         Object.assign(this,
             {shape, material, size})
         this.num_rotation = 0;
+        this.still = false;
+         
+        this.pos = []
+        for(let i of this.shape.pos){
+            this.pos.push(i.slice())
+        }
+        
+        
     }
 
     // (within some margin of distance).
@@ -26,6 +41,7 @@ export class Body {
 
     emplace(location_matrix, linear_velocity, angular_velocity, spin_axis = vec3(0, 0, 0).randomized(1).normalized()) {                               // emplace(): assign the body's initial values, or overwrite them.
         this.center = location_matrix.times(vec4(0, 0, 0, 1)).to3();
+        //console.log(this.center)
         this.rotation = Mat4.translation(...this.center.times(-1)).times(location_matrix);
         this.previous = {center: this.center.copy(), rotation: this.rotation.copy()};
         // drawn_location gets replaced with an interpolated quantity:
@@ -84,8 +100,17 @@ export class Body {
         // a_inv*b.  Check if in that coordinate frame it penetrates
         // the unit sphere at the origin.  Leave some leeway.
         //console.log(points.arrays.position)
+        
         return points.arrays.position.some(p =>
             intersect_test(T.times(p.to4(1)).to3(), leeway));
+    }
+
+    check(){
+        console.log("shape")
+        let arr= this.shape.arrays.position.map(p =>
+            this.drawn_location.times(p.to4(1)).to3());
+        console.log(arr)
+       
     }
 }
 
@@ -113,8 +138,10 @@ export class Simulation extends Scene {
         while (Math.abs(this.time_accumulator) >= this.dt) {
             // Single step of the simulation for all bodies:
             this.update_state(this.dt);
-            for (let b of this.bodies)
+            for (let b of this.bodies){
+                if(!b.still)
                 b.advance(this.dt);
+            }
             // Following the advice of the article, de-couple
             // our simulation time from our frame rate:
             this.t += Math.sign(frame_time) * this.dt;
@@ -200,15 +227,17 @@ export class Test_Demo extends Simulation {
         super();
         this.data = new Test_Data();
         this.addNext = true;
+        this.index = 0;
+        this.move = true;
+        this.dis = true;
+        this.grid = this.initGrid();
+        //console.log(grid)
         //this.shapes = Object.assign({}, this.data.shapes);
         this.collider = {intersect_test: Body.intersect_cube, points: new defs.Cube(), leeway: 1};
         this.shapes = {
-            donut: new defs.Torus(15, 15, [[0, 2], [0, 1]]),
-            cone: new defs.Closed_Cone(4, 10, [[0, 2], [0, 1]]),
-            capped: new defs.Capped_Cylinder(4, 12, [[0, 2], [0, 1]]),
-            ball: new defs.Subdivision_Sphere(3, [[0, 1], [0, 1]]),
-            cube: new defs.Cube(),
+            Lshape : new Lshape(),
             jshape: new Jshape(),
+            ishape: new Ishape(),
             prism: new (defs.Capped_Cylinder.prototype.make_flat_shaded_version())(10, 10, [[0, 2], [0, 1]]),
             gem: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
             donut2: new (defs.Torus.prototype.make_flat_shaded_version())(20, 20, [[0, 2], [0, 1]]),
@@ -225,38 +254,100 @@ export class Test_Demo extends Simulation {
         };
     }
 
-    random_color() {
-        return this.material.override(color(.6, .6 * Math.random(), .6 * Math.random(), 1));
+   initGrid() {
+        function fill(arr, value) {
+            for (var i = 0; i < arr.length; i++) {
+                arr[i] = value;
+            }
+        }
+        let grid = [];
+        // let nRows = 10;
+        // let nCols = 18;
+        for (var r = 0; r < nRows; r++) {
+            grid[r] = new Array(nCols);
+            fill(grid[r], -1);
+            for (var c = 0; c < nCols; c++) {
+                if (c === 0 || c === nCols - 1 || r === nRows - 1)
+                    grid[r][c] = -2;
+            }
+        }
+        return grid;
     }
 
+    getGridCoord(body){
+        let r = 16-(Math.round(body.center[1]/2.0)+6)
+        
+        let c = Math.round(body.center[0]/2.0)+7
+        
+        return [r,c];
+    }
+
+    canMove(body) {
+        let out = this;
+        return body.pos.every(function (p) {
+            
+            let arr = out.getGridCoord(body);
+           //console.log(arr)
+            let r = arr[0]+p[1]+1;
+            let c = arr[1]+p[0];
+            //console.log(r)
+            return out.grid[r][c] === EMPTY;
+        });
+    }
     update_state(dt) {
         // update_state():  Override the base time-stepping code to say what this particular
         // scene should do to its bodies every frame -- including applying forces.
         // Generate additional moving bodies if there ever aren't enough:
         //while (this.bodies.length < 2)
       
-        if(this.addNext&&this.bodies.length < 2){
+        if(this.addNext&&this.bodies.length < 4){
           
             this.bodies.push(new Body(this.shapes.jshape, this.materials.plastic, vec3(1, 1, 1))
                 .emplace(Mat4.translation(...vec3(0, 15, 0)),
                     vec3(0, -1, 0), 0));
+                    //console.log(this.bodies[this.index].center)
                     this.addNext = false;
+                    this.index++;
                     
         }
 
-        let b = this.bodies[this.bodies.length-1];
+        let b = this.bodies[this.index-1];
+    
             // Gravity on Earth, where 1 unit in world space = 1 meter:
             
             b.linear_velocity[1] += dt * -0.2;
+            if(this.move == true){
+                let model_transform = b.drawn_location.times(Mat4.translation(2, 0, 0))
+                b.emplace(model_transform,b.linear_velocity,0);
+                this.move = false;
+            }
             
             // If about to fall through floor, reverse y velocity:
-            if (b.center[1] < -8 && b.linear_velocity[1] < 0){
+            b.inverse = Mat4.inverse(b.drawn_location);
+            //if ((!b.still&&this.index===1&&b.center[1] < -8) ||(!b.still&&this.index==2&&b.center[1] < -4)){
+            if (!b.still&&!this.canMove(b)){
                 b.linear_velocity[1] = 0;
                 b.linear_velocity[0] = 0;
                 b.linear_velocity[2] = 0;
+                console.log(b.center)
+                let gridCord = this.getGridCoord(b);
+                let r = gridCord[0]
+                let c = gridCord[1]
+                
+                let out = this;
+                b.pos.forEach(function (p) {
+                    out.grid[r + p[1]][c + p[0]] = 99;
+                });
+                
+                
+                console.log(this.grid);
+               
+                
+                //console.log(b.shape.arrays.position)
+                b.still = true;
                 this.addNext = true;
             }
-            b.inverse = Mat4.inverse(b.drawn_location);
+            
             for (let c of this.bodies){
                 if (b.check_if_colliding(c, this.collider)){
                     b.linear_velocity[1] = 0;
@@ -298,7 +389,13 @@ export class Test_Demo extends Simulation {
             let model_transform = currentBody.drawn_location.times(Mat4.rotation(Math.PI/2,0,0,1));
             currentBody.num_rotation = (currentBody.num_rotation + 1) % 4;
             console.log(currentBody.num_rotation);
+            currentBody.pos.forEach(function (row) {
+                var tmp = row[0];
+                row[0] = row[1];
+                row[1] = -tmp;
+            });
             currentBody.emplace(model_transform,currentBody.linear_velocity,0);
+           
         });
         this.new_line();
         this.key_triggered_button("left", ["j"], () => {
@@ -351,115 +448,6 @@ export class Test_Demo extends Simulation {
         document_element.innerHTML += `<p>This demo lets random initial momentums carry bodies until they fall and bounce.  It shows a good way to do incremental movements, which are crucial for making objects look like they're moving on their own instead of following a pre-determined path.  Animated objects look more real when they have inertia and obey physical laws, instead of being driven by simple sinusoids or periodic functions.
                                      </p><p>For each moving object, we need to store a model matrix somewhere that is permanent (such as inside of our class) so we can keep consulting it every frame.  As an example, for a bowling simulation, the ball and each pin would go into an array (including 11 total matrices).  We give the model transform matrix a \"velocity\" and track it over time, which is split up into linear and angular components.  Here the angular velocity is expressed as an Euler angle-axis pair so that we can scale the angular speed how we want it.
                                      </p><p>The forward Euler method is used to advance the linear and angular velocities of each shape one time-step.  The velocities are not subject to any forces here, but just a downward acceleration.  Velocities are also constrained to not take any objects under the ground plane.
-                                     </p><p>This scene extends class Simulation, which carefully manages stepping simulation time for any scenes that subclass it.  It totally decouples the whole simulation from the frame rate, following the suggestions in the blog post <a href=\"https://gafferongames.com/post/fix_your_timestep/\" target=\"blank\">\"Fix Your Timestep\"</a> by Glenn Fielder.  Buttons allow you to speed up and slow down time to show that the simulation's answers do not change.</p>`;
-    }
-}
-
-
-export class Collision_Demo extends Simulation {
-    // **Collision_Demo** demonstration: Detect when some flying objects
-    // collide with one another, coloring them red.
-    constructor() {
-        super();
-        this.data = new Test_Data();
-        this.shapes = Object.assign({}, this.data.shapes);
-        // Make simpler dummy shapes for representing all other shapes during collisions:
-        this.colliders = [
-            {intersect_test: Body.intersect_sphere, points: new defs.Subdivision_Sphere(1), leeway: .5},
-            {intersect_test: Body.intersect_sphere, points: new defs.Subdivision_Sphere(2), leeway: .3},
-            {intersect_test: Body.intersect_cube, points: new defs.Cube(), leeway: .1}
-        ];
-        this.collider_selection = 0;
-        // Materials:
-        const phong = new defs.Phong_Shader(1);
-        const bump = new defs.Fake_Bump_Map(1)
-        this.inactive_color = new Material(bump, {
-            color: color(.5, .5, .5, 1), ambient: .2,
-            texture: this.data.textures.rgb
-        });
-        this.active_color = this.inactive_color.override({color: color(.5, 0, 0, 1), ambient: .5});
-        this.bright = new Material(phong, {color: color(0, 1, 0, .5), ambient: 1});
-    }
-
-    make_control_panel() {
-        this.key_triggered_button("Previous collider", ["b"], this.decrease);
-        this.key_triggered_button("Next", ["n"], this.increase);
-        this.new_line();
-        super.make_control_panel();
-    }
-
-    increase() {
-        this.collider_selection = Math.min(this.collider_selection + 1, this.colliders.length - 1);
-    }
-
-    decrease() {
-        this.collider_selection = Math.max(this.collider_selection - 1, 0)
-    }
-
-    update_state(dt, num_bodies = 40) {
-        // update_state():  Override the base time-stepping code to say what this particular
-        // scene should do to its bodies every frame -- including applying forces.
-        // Generate moving bodies:
-        while (this.bodies.length < num_bodies)
-            this.bodies.push(new Body(this.data.random_shape(), undefined, vec3(1, 5, 1))
-                .emplace(Mat4.translation(...unsafe3(0, 0, 0).randomized(30))
-                        .times(Mat4.rotation(Math.PI, ...unsafe3(0, 0, 0).randomized(1).normalized())),
-                    unsafe3(0, 0, 0).randomized(20), Math.random()));
-        // Sometimes we delete some so they can re-generate as new ones:
-        this.bodies = this.bodies.filter(b => (Math.random() > .01) || b.linear_velocity.norm() > 1);
-
-        const collider = this.colliders[this.collider_selection];
-        // Loop through all bodies (call each "a"):
-        for (let a of this.bodies) {
-            // Cache the inverse of matrix of body "a" to save time.
-            a.inverse = Mat4.inverse(a.drawn_location);
-
-            a.linear_velocity = a.linear_velocity.minus(a.center.times(dt));
-            // Apply a small centripetal force to everything.
-            a.material = this.inactive_color;
-            // Default color: white
-
-            if (a.linear_velocity.norm() == 0)
-                continue;
-            // *** Collision process is here ***
-            // Loop through all bodies again (call each "b"):
-            for (let b of this.bodies) {
-                // Pass the two bodies and the collision shape to check_if_colliding():
-                if (!a.check_if_colliding(b, collider))
-                    continue;
-                // If we get here, we collided, so turn red and zero out the
-                // velocity so they don't inter-penetrate any further.
-                a.material = this.active_color;
-                a.linear_velocity = vec3(0, 0, 0);
-                a.angular_velocity = 0;
-            }
-        }
-    }
-
-    display(context, program_state) {
-        // display(): Draw everything else in the scene besides the moving bodies.
-        super.display(context, program_state);
-        if (!context.scratchpad.controls) {
-            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-            this.children.push(new defs.Program_State_Viewer());
-            program_state.set_camera(Mat4.translation(0, 0, -50));
-            // Locate the camera here (inverted matrix).
-        }
-        program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
-        program_state.lights = [new Light(vec4(.7, 1.5, 2, 0), color(1, 1, 1, 1), 100000)];
-
-        // Draw an extra bounding sphere around each drawn shape to show
-        // the physical shape that is really being collided with:
-        const {points, leeway} = this.colliders[this.collider_selection];
-        const size = vec3(1 + leeway, 1 + leeway, 1 + leeway);
-        for (let b of this.bodies)
-            points.draw(context, program_state, b.drawn_location.times(Mat4.scale(...size)), this.bright, "LINE_STRIP");
-    }
-
-    show_explanation(document_element) {
-        document_element.innerHTML += `<p>This demo detects when some flying objects collide with one another, coloring them red when they do.  For a simpler demo that shows physics-based movement without objects that hit one another, see the demo called Inertia_Demo.
-                                     </p><p>Detecting intersections between pairs of stretched out, rotated volumes can be difficult, but is made easier by being in the right coordinate space.  The collision algorithm treats every shape like an ellipsoid roughly conforming to the drawn shape, and with the same transformation matrix applied.  Here these collision volumes are drawn in translucent purple alongside the real shape so that you can see them.
-                                     </p><p>This particular collision method is extremely short to code, as you can observe in the method \"check_if_colliding\" in the class called Body below.  It has problems, though.  Making every collision body a stretched sphere is a hack and doesn't handle the nuances of the actual shape being drawn, such as a cube's corners that stick out.  Looping through a list of discrete sphere points to see if the volumes intersect is *really* a hack (there are perfectly good analytic expressions that can test if two ellipsoids intersect without discretizing them into points, although they involve solving a high order polynomial).   On the other hand, for non-convex shapes a real collision method cannot be exact either, and is usually going to have to loop through a list of discrete tetrahedrons defining the shape anyway.
                                      </p><p>This scene extends class Simulation, which carefully manages stepping simulation time for any scenes that subclass it.  It totally decouples the whole simulation from the frame rate, following the suggestions in the blog post <a href=\"https://gafferongames.com/post/fix_your_timestep/\" target=\"blank\">\"Fix Your Timestep\"</a> by Glenn Fielder.  Buttons allow you to speed up and slow down time to show that the simulation's answers do not change.</p>`;
     }
 }
