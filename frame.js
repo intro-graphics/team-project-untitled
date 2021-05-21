@@ -82,7 +82,6 @@ export class Frame extends Scene {
             'outline': new Cube_Outline(color(1,1,1,1)),
             'endline': new Cube_Outline(color(1,0,0,1)),
             'base': new Cube_Outline(color(0.6,0.6,0.6,1)),
-            'strip': new Cube_Single_Strip(),
         };
 
         // *** Materials

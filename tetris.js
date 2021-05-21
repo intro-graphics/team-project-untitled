@@ -122,6 +122,8 @@ export class Simulation extends Scene {
     constructor() {
         super();
         Object.assign(this, {time_accumulator: 0, time_scale: 1, t: 0, dt: 1 / 20, bodies: [], steps_taken: 0});
+        //slow down the time for demo purpose
+        this.time_scale /= 625;
     }
 
     simulate(frame_time) {
