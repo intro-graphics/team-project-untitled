@@ -117,6 +117,7 @@ export class Ishape extends Shape{
             [-4, 2, -1], [-4, 0, -1],
             [4, 0, -1], [4, 2, -1]
         );
+        this.pos = [[-1,0], [0, 0], [1,0], [-2,0]]
         this.arrays.normal = this.arrays.position;
         this.indices = [0, 1, 2, 1, 2, 5, 2, 5, 3, 5, 3, 4, 3, 4, 0, 4, 0, 7, 0, 7, 6, 
                         7, 6, 4, 6, 4, 5, 4, 5, 3, 5, 3, 2, 3, 2, 0, 2, 0, 1, 0, 1, 6, 1, 6, 5];
@@ -139,6 +140,7 @@ export class squareShape extends Shape {
             [-2, 2, -1], [-2, -2, -1],
             [2, -2, -1], [2, 2, -1], 
         );
+        this.pos = [[0, 0], [1, 0], [0, 1], [1, 1]]
         this.arrays.normal = this.arrays.position;
         this.indices = [0, 1, 2, 1, 2, 5, 2, 5, 3, 5, 3, 4, 3, 4, 0, 4, 0, 7, 0, 7, 6, 
                         7, 6, 4, 6, 4, 5, 4, 5, 3, 5, 3, 2, 3, 2, 0, 2, 0, 1, 0, 1, 6, 1, 6, 5];
@@ -165,6 +167,7 @@ export class Tshape extends Shape {
             [3, -1, -1], [-3, -1, -1],
             [-3, 1, -1], [-1, 1, -1]
         );
+        this.pos = [[-1, 0], [0, 0], [1, 0], [0, -1]]
         this.arrays.normal = this.arrays.position;
         this.indices = [5, 4, 2, 4, 2, 3, 3, 4, 13, 13, 3, 12, 13, 12, 14, 14, 12, 11, 11, 14, 2, 2, 14, 5,
                         4, 5, 13, 13, 5, 14, 14, 11, 2, 2, 11, 12, 12, 2, 3,

@@ -1,5 +1,5 @@
 import {defs, tiny} from './examples/common.js';
-import {Jshape,Lshape,Lout,squareShape,Ishape} from './texture.js'
+import {Jshape,Lshape,Lout,squareShape,Ishape, Tshape} from './texture.js'
 
 // Pull these names into this module's scope for convenience:
 const {vec3, unsafe3, vec4, color, Mat4, Light, Shape, Material, Shader, Texture, Scene} = tiny;
@@ -141,8 +141,10 @@ export class Simulation extends Scene {
             // Single step of the simulation for all bodies:
             this.update_state(this.dt);
             for (let b of this.bodies){
-                if(!b.still)
-                b.advance(this.dt);
+                if(!b.still){
+                    b.advance(this.dt);
+                }
+                
             }
             // Following the advice of the article, de-couple
             // our simulation time from our frame rate:
@@ -240,9 +242,8 @@ export class Test_Demo extends Simulation {
             Lshape : new Lshape(),
             jshape: new Jshape(),
             ishape: new Ishape(),
-            prism: new (defs.Capped_Cylinder.prototype.make_flat_shaded_version())(10, 10, [[0, 2], [0, 1]]),
-            gem: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
-            donut2: new (defs.Torus.prototype.make_flat_shaded_version())(20, 20, [[0, 2], [0, 1]]),
+            squareshape: new squareShape(),
+            tshape: new Tshape(),
         };
         this.shapes.square = new defs.Square();
         const shader = new defs.Fake_Bump_Map(1);
@@ -254,6 +255,11 @@ export class Test_Demo extends Simulation {
             plastic: new Material(new defs.Phong_Shader(),
                 {ambient: .6, diffusivity: .6, specularity: .1, color: color(.9, .2, .4, 1)}),
         };
+    }
+    random_shape(shape_list = this.shapes) {
+        // random_shape():  Extract a random shape from this.shapes.
+        const shape_names = Object.keys(shape_list);
+        return shape_list[shape_names[~~(shape_names.length * Math.random())]]
     }
 
    initGrid() {
@@ -277,7 +283,7 @@ export class Test_Demo extends Simulation {
     }
 
     getGridCoord(body){
-        let r = 16-(Math.round(body.center[1]/2.0)+6)
+        let r = 16-((body.center[1]/2.0)+6)
         
         let c = Math.round(body.center[0]/2.0)+7
         
@@ -290,9 +296,11 @@ export class Test_Demo extends Simulation {
             
             let arr = out.getGridCoord(body);
            //console.log(arr)
-            let r = arr[0]+p[1]+1;
+            let r = Math.round(arr[0]+1)+p[1];
             let c = arr[1]+p[0];
             //console.log(r)
+            
+            
             return out.grid[r][c] === EMPTY;
         });
     }
@@ -304,24 +312,22 @@ export class Test_Demo extends Simulation {
       
         if(this.addNext&&this.bodies.length < 5){
             var random_color = color(Math.random(), Math.random(), Math.random(), 1.0);  // color of falling blocks defined here
-            this.bodies.push(new Body(this.shapes.Lshape, this.materials.plastic.override({color: random_color}), vec3(1, 1, 1))
+            //let myshape = this.random_shape()
+            this.bodies.push(new Body(this.shapes.tshape, this.materials.plastic.override({color: random_color}), vec3(1, 1, 1))
                 .emplace(Mat4.translation(...vec3(0, 15, 0)),
                     vec3(0, -1, 0), 0));
                     //console.log(this.bodies[this.index].center)
                     this.addNext = false;
-                    this.index++;
+                    
+                    
         }
 
-        let b = this.bodies[this.index-1];
+        let b = this.bodies[this.bodies.length-1];
     
             // Gravity on Earth, where 1 unit in world space = 1 meter:
             
             b.linear_velocity[1] += dt * -0.2;
-            if(this.move == true){
-                let model_transform = b.drawn_location.times(Mat4.translation(2, 0, 0))
-                b.emplace(model_transform,b.linear_velocity,0);
-                this.move = false;
-            }
+           
             
             // If about to fall through floor, reverse y velocity:
             b.inverse = Mat4.inverse(b.drawn_location);
@@ -332,7 +338,8 @@ export class Test_Demo extends Simulation {
                 b.linear_velocity[2] = 0;
                 console.log(b.center)
                 let gridCord = this.getGridCoord(b);
-                let r = gridCord[0]
+                console.log(gridCord)
+                let r = Math.round(gridCord[0])
                 let c = gridCord[1]
                 
                 let out = this;
@@ -346,17 +353,19 @@ export class Test_Demo extends Simulation {
                 
                 //console.log(b.shape.arrays.position)
                 b.still = true;
+                //console.log(b)
                 this.addNext = true;
             }
             
-            for (let c of this.bodies){
-                if (b.check_if_colliding(c, this.collider)){
-                    b.linear_velocity[1] = 0;
-                    b.linear_velocity[0] = 0;
-                    b.linear_velocity[2] = 0;
-                    this.addNext = true;
-                }
-            }
+            
+            // for (let c of this.bodies){
+            //     if (b.check_if_colliding(c, this.collider)){
+            //         b.linear_velocity[1] = 0;
+            //         b.linear_velocity[0] = 0;
+            //         b.linear_velocity[2] = 0;
+            //         this.addNext = true;
+            //     }
+            // }
         
         // Delete bodies that stop or stray too far away:
         //this.bodies = this.bodies.filter(b => b.center.norm() < 50 && b.linear_velocity.norm() > 2);
@@ -387,6 +396,9 @@ export class Test_Demo extends Simulation {
         this.new_line();
         this.key_triggered_button("Rotate", ["i"], () => {
             let currentBody = this.bodies[this.bodies.length-1];
+            if(currentBody.shape.constructor.name==="squareShape"){
+                return;
+            }
             let model_transform = currentBody.drawn_location.times(Mat4.rotation(Math.PI/2,0,0,1));
             currentBody.num_rotation = (currentBody.num_rotation + 1) % 4;
             console.log(currentBody.num_rotation);
