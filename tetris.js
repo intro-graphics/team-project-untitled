@@ -250,7 +250,7 @@ export class Test_Demo extends Simulation {
         })
         this.materials = {
             plastic: new Material(new defs.Phong_Shader(),
-                {ambient: .6, diffusivity: .6, specularity: .1, color: color(.4, .8, .4, 1)}),
+                {ambient: .6, diffusivity: .6, specularity: .1, color: color(.9, .2, .4, 1)}),
         };
     }
 
@@ -300,15 +300,14 @@ export class Test_Demo extends Simulation {
         // Generate additional moving bodies if there ever aren't enough:
         //while (this.bodies.length < 2)
       
-        if(this.addNext&&this.bodies.length < 4){
-          
-            this.bodies.push(new Body(this.shapes.jshape, this.materials.plastic, vec3(1, 1, 1))
+        if(this.addNext&&this.bodies.length < 5){
+            var random_color = color(Math.random(), Math.random(), Math.random(), 1.0);  // color of falling blocks defined here
+            this.bodies.push(new Body(this.shapes.Lshape, this.materials.plastic.override({color: random_color}), vec3(1, 1, 1))
                 .emplace(Mat4.translation(...vec3(0, 15, 0)),
                     vec3(0, -1, 0), 0));
                     //console.log(this.bodies[this.index].center)
                     this.addNext = false;
                     this.index++;
-                    
         }
 
         let b = this.bodies[this.index-1];
