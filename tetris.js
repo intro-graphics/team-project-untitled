@@ -248,7 +248,7 @@ export class Test_Demo extends Simulation {
         this.shapes.square = new defs.Square();
         const shader = new defs.Fake_Bump_Map(1);
         this.material = new Material(shader, {
-            color: color(.4, .8, .4, 1),
+            // color: color(.4, .8, .4, 1),
             ambient: .4, texture: this.data.textures.stars
         })
         this.materials = {
@@ -385,7 +385,7 @@ export class Test_Demo extends Simulation {
         // Draw the ground:
         this.shapes.square.draw(context, program_state, Mat4.translation(0, -10, 0)
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(50, 50, 1)),
-            this.material.override(this.data.textures.earth));
+            this.material.override(this.data.textures.stars));
         // let model_transform = Mat4.identity()
         // this.shapes.jshape.draw(context, program_state, model_transform, this.materials.plastic);
     }
