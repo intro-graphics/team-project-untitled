@@ -186,10 +186,19 @@ export class Sshape extends Shape {
     constructor() {
         super("position", "normal");
         this.arrays.position = Vector3.cast(
-            
+            [-1, 1, 1], [-1, -1, 1],
+            [3, -1, 1], [3, 1, 1],
+            [-1, 1, -1], [-1, -1, -1],
+            [3, -1, -1], [3, 1, -1],
+            [-3, 3, 1], [-3, 1, 1],
+            [1, 1, 1], [1, 3, 1],
+            [-3, 3, -1], [-3, 1, -1],
+            [1, 1, -1], [1, 3, -1],
         );
         this.arrays.normal = this.arrays.position;
-        this.indices = [];
+        this.indices = [9, 8, 13, 13, 8, 12, 12, 8, 11, 11, 8, 10, 10, 8, 9, 9, 10, 14, 14, 9, 13, 13, 14, 15, 
+                        15, 13, 12,12, 11, 15, 15, 11, 10, 10, 15, 14, 14, 10, 4, 4, 7, 3, 3, 4, 0, 0, 3, 2, 2,
+                        0, 1, 1, 2, 6, 6, 1, 5, 5, 6, 7, 7, 5, 4, 4, 0, 5, 5, 0, 1, 1, 2, 6, 6, 2, 7, 7, 2, 3];
         this.rot_time = 0;
     }
     rotate() {
@@ -217,6 +226,7 @@ class Base_Scene extends Scene {
             "IShape": new Ishape(),
             "SquareShape": new squareShape(),
             "TShape": new Tshape(),
+            "SShape": new Sshape(),
         };
 
         // *** Materials
@@ -293,6 +303,9 @@ export class Assignment2 extends Base_Scene {
         this.key_triggered_button("Rotate Obj T", ["r Tshape"], () => {
             this.shapes.TShape.rotate();
         });
+        this.key_triggered_button("Rotate Obj S", ["r Sshape"], () => {
+            this.shapes.SShape.rotate();
+        });
     }
 
      draw_L(context, program_state, model_transform, color) {
@@ -342,6 +355,15 @@ export class Assignment2 extends Base_Scene {
         this.shapes.TShape.draw(context, program_state, model_transform, this.materials.plastic.override({color:color}));
      }
 
+     draw_S(context, program_state, model_transform, color) {
+        var rot_time;
+        rot_time = this.shapes.SShape.get_rot();
+        rot_time = rot_time % 4;
+        let displacement = rot_time * 0.5 * Math.PI;
+        model_transform = model_transform.times(Mat4.rotation(displacement, 0, 0, 1));
+        this.shapes.SShape.draw(context, program_state, model_transform, this.materials.plastic.override({color:color}));
+     }
+
 
     display(context, program_state) {
         super.display(context, program_state);
@@ -372,6 +394,9 @@ export class Assignment2 extends Base_Scene {
 
         model_transform = Mat4.translation(-15, 0, 0);
         this.draw_T(context, program_state, model_transform, hex_color("#ff00ff"));
+
+        model_transform = Mat4.translation(-15, 10, 0);
+        this.draw_S(context, program_state, model_transform, hex_color("#00ff00"));
     }
 }
 
