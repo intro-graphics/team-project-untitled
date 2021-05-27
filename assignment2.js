@@ -186,17 +186,16 @@ export class Assignment2 extends Base_Scene {
 
     random_color() {
         // random_shape():  Extract a random shape from this.shapes.
-        let index = 4 * Math.random();
-        return index;
+        return 4 * Math.random();
     }
 
     get_color(index) {
         var color;
-        if (index == 0){
+        if (index === 0){
             color = hex_color("#ff0000");
-        } else if (index == 1 ) {
+        } else if (index === 1 ) {
             color = hex_color("#00ff00");
-        } else if ( index == 2 ) {
+        } else if ( index === 2 ) {
             color = hex_color("#0000ff");
         } else {
             color = hex_color("#fcd303");
@@ -243,7 +242,7 @@ export class Assignment2 extends Base_Scene {
                 next_shape = shape.TShape;
                 break;
             case 5:
-                next_shape = shape.SShape;
+                next_shape = shape.Square;
                 break;
             case 6:
                 next_shape = shape.LShape;
@@ -270,37 +269,35 @@ export class Assignment2 extends Base_Scene {
         let grid = [];
         // let nRows = 10;
         // let nCols = 18;
-        for (var r = 0; r < nRows; r++) {
+        for (let r = 0; r < nRows; r++) {
             grid[r] = new Array(nCols);
             fill(grid[r], -1);
-            for (var c = 0; c < nCols; c++) {
+            for (let c = 0; c < nCols; c++) {
                 if (c === 0 || c === nCols - 1)
                     grid[r][c] = -2;
             }
         }
         return grid;
     }
-    // set_colors() {
-    //     this.colors = [];
-    //     for(let i=0;i<8;i++){
-    //         this.colors.push(color(Math.random(), Math.random(), Math.random(), 1.0))
-    //     }
-        // TODO:  Create a class member variable to store your cube's colors.
-        // Hint:  You might need to create a member variable at somewhere to store the colors, using `this`.
-        // Hint2: You can consider add a constructor for class Assignment2, or add member variables in Base_Scene's constructor.
     
 
     make_control_panel() {
-        // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        this.key_triggered_button("Change Colors", ["c"], this.set_colors);
-        // Add a button for controlling the scene.
-        this.key_triggered_button("Outline", ["o"], () => {
-            // TODO:  Requirement 5b:  Set a flag here that will toggle your outline on and off
-            this.is_outline = !this.is_outline
+        this.key_triggered_button("Rotate", ["ArrowUp"], () => {
+            if(this.canRotate())
+                this.rotate(this.falling);
         });
-        this.key_triggered_button("Sit still", ["m"], () => {
-            // TODO:  Requirement 3d:  Set a flag here that will toggle your swaying motion on and off.
-            this.is_still = !this.is_still;
+        this.new_line();
+        this.key_triggered_button("left", ["ArrowLeft"], () => {
+            if(this.canMove([-1,0]))
+                this.move([-1,0]);
+        });
+        this.key_triggered_button("right", ["ArrowRight"], () => {
+            if(this.canMove([1,0]))
+                this.move([1,0]);
+        });
+        this.key_triggered_button("down", ["ArrowDown"], () => {
+            if(this.canMove([0,1]))
+                this.move([0,1]);
         });
     }
 
@@ -310,16 +307,16 @@ export class Assignment2 extends Base_Scene {
     }
 
     draw_cube(context, program_state){
-        for (var i = 0; i < nCols; i++){
-            for (var j = 0; j < nRows; j++){
-                if ( this.grid[i][j] == -2 ){
-                    var x = j - .5 * nRows;
-                    var y = 15 - i - 1;
+        for (let i = 0; i < nCols; i++){
+            for (let j = 0; j < nRows; j++){
+                if ( this.grid[i][j] === -2 ){
+                    let x = j - .5 * nRows;
+                    let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
-                } else if ( this.grid[i][j] != -1 ){
-                    var x = j - .5 * nRows;
-                    var y = 15 - i - 1;
+                } else if ( this.grid[i][j] !== -1 ){
+                    let x = j - .5 * nRows;
+                    let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     let color = this.get_color(this.grid[i][j]);
                     this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: color}));
@@ -330,35 +327,62 @@ export class Assignment2 extends Base_Scene {
         }
     }
 
-    canMove(){
-       
+    canMove(dir){
         for (let arr of this.falling.pos){
-        var newCol = this.falling.c + arr[0];
-         var newRow = this.falling.r + 1 + arr[1];
-         if (this.grid[newRow][newCol] !== EMPTY){
-             return false
-         }
+            let newCol = this.falling.c + arr[0] + dir[0];
+            let newRow = this.falling.r + arr[1] + dir[1];
+            if (this.grid[newRow][newCol] !== EMPTY){
+                return false
+            }
         }
         return true;
     }
+
+    canRotate(){
+        for (let arr of this.falling.pos){
+            let tempCol = arr[1];
+            let tempRow = -arr[0];
+            let newCol = this.falling.c + tempCol;
+            let newRow = this.falling.r + tempRow;
+            if(this.grid[newRow][newCol] !== EMPTY){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    move(dir){
+        //dir is a two element array [-1~1,-1~1] to indicate the direction
+        this.falling.r += dir[1];
+        this.falling.c += dir[0];
+    }
+
+    rotate(s){
+        if (this.falling.pos === this.shape_t.Square)
+            return;
+        for (let arr of this.falling.pos){
+            let temp = arr[0];
+            arr[0] = arr[1];
+            arr[1] = -temp;
+        }
+    }
+
     draw_falling_shape(context, program_state,shape){
         
         for (let arr of shape.pos){
-            var x = shape.c + arr[0] - .5 * nRows;
-            var y = 15 - (shape.r + arr[1]) - 1;
+            let x = shape.c + arr[0] - .5 * nRows;
+            let y = 15 - (shape.r + arr[1]) - 1;
             let model_transform = Mat4.translation(x*2, y*2, 0);
             this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: hex_color("#ff0000")}));
             this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
         }
-  
-     
-        
+
     }
     addShapetoGrid(){
         
         for (let arr of this.falling.pos){
-            var newCol = this.falling.c + arr[0];
-             var newRow = this.falling.r + arr[1];
+            let newCol = this.falling.c + arr[0];
+             let newRow = this.falling.r + arr[1];
              this.grid[newRow][newCol] = FILLED
         }
         this.addNext = true;
@@ -379,15 +403,12 @@ export class Assignment2 extends Base_Scene {
         this.shapes.square.draw(context, program_state, Mat4.translation(0, -20, 0)
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 1)),
             this.material);
-        
-        // let model_transform = Mat4.identity().times(Mat4.translation(0, -9, 0));
-        //model_transform = model_transform.times(Mat4.scale(1,1.5,1));
-        // this.grid[1][1] = 99;
-        for (var i = 1; i < nCols - 1; i++){
+
+        for (let i = 1; i < nCols - 1; i++){
             let temp = this.random_color();
-            if (program_state.animation_time % 10000 == 0)
+            if (program_state.animation_time % 10000 === 0)
                 console.log(temp);
-            if (this.grid[nRows-1][i] == -1)
+            if (this.grid[nRows-1][i] === -1)
                 this.grid[nRows-1][i] = Math.floor(temp);
             
         }
@@ -401,14 +422,13 @@ export class Assignment2 extends Base_Scene {
                 this.gene_new_obj();
                 this.addNext = false;
                 this.totalobj++;
-                //console.log(this.grid)
             }
         
        
         let t = program_state.animation_time / 1000
         if(t>counter){
-            if(this.canMove()){
-                this.falling.r = this.falling.r+1
+            if(this.canMove([0,1])){
+                this.move([0,1]);
             }
             else{
                 this.addShapetoGrid()
