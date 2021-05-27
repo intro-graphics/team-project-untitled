@@ -136,6 +136,11 @@ export class Assignment2 extends Base_Scene {
         this.is_odd = true;
         // this.set_colors()
         this.grid = this.initGrid();
+        this.obj = [];
+        this.test = false;
+        this.new_T()
+        this.get_color()
+        this.gene_new_obj()
         this.shapes.square = new defs.Square();
         const shader = new defs.Fake_Bump_Map(1);
         this.textures = {
@@ -149,18 +154,53 @@ export class Assignment2 extends Base_Scene {
             color: hex_color('#000000'),
             ambient: 1, texture: new Texture("./assets/stars.png")
         })
-        this.colors = {
-            red: hex_color("#ff0000"),
-            green: hex_color("#00ff00"),
-            blue: hex_color("#0000ff"),
-            gold: hex_color("#fcd303"),
-        }
+//         this.colors = [
+//             hex_color("#ff0000"),
+//             hex_color("#00ff00"),
+//             hex_color("#0000ff"),
+//             hex_color("#fcd303"),
+//         ]
     }
 
-    random_color(color_list = this.colors) {
+    random_color() {
         // random_shape():  Extract a random shape from this.shapes.
-        const color_names = Object.keys(color_list);
-        return color_list[color_names[~~(color_names.length * Math.random())]]
+        let index = 4 * Math.random();
+        return index;
+    }
+
+    get_color(index) {
+        var color;
+        if (index == 0){
+            color = hex_color("#ff0000");
+        } else if (index == 1 ) {
+            color = hex_color("#00ff00");
+        } else if ( index == 2 ) {
+            color = hex_color("#0000ff");
+        } else {
+            color = hex_color("#fcd303");
+        }
+        return color;
+    }
+
+    new_T() {
+        let y = 1 + Math.floor((nCols - 4) * Math.random());
+        let x = 1;
+        // x y will be the bottom left corner of the generated T shape
+        let temp = this.random_color();
+        let Tshape = [[x, y], [x, y+1], [x-1, y+1], [x, y+2]];
+        for ( var i = 0; i < 4; i++){
+            console.log(Tshape[i][0]);
+            this.grid[Tshape[i][0]][Tshape[i][1]] = temp;
+        }
+        this.obj.push(Tshape);
+    }
+
+    gene_new_obj() {
+        let num = 1 + Math.floor(7 * Math.random());
+        switch(num){
+            case 1:
+                this.new_T();
+        }
     }
 
     initGrid() {
@@ -206,7 +246,9 @@ export class Assignment2 extends Base_Scene {
         });
     }
 
-    draw_cube(context, program_state, color){
+
+
+    draw_cube(context, program_state){
         for (var i = 0; i < nCols; i++){
             for (var j = 0; j < nRows; j++){
                 if ( this.grid[i][j] == -2 ){
@@ -218,7 +260,8 @@ export class Assignment2 extends Base_Scene {
                     var x = j - .5 * nRows;
                     var y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
-                    this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: hex_color("#ff0000")}));
+                    let color = this.get_color(this.grid[i][j]);
+                    this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: color}));
                     this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
                 }
 
@@ -244,13 +287,21 @@ export class Assignment2 extends Base_Scene {
         
         // let model_transform = Mat4.identity().times(Mat4.translation(0, -9, 0));
         //model_transform = model_transform.times(Mat4.scale(1,1.5,1));
-        this.grid[1][1] = 99;
+        // this.grid[1][1] = 99;
         for (var i = 1; i < nCols - 1; i++){
-            let temp = this.random_color;
-            console.log(temp);
-            this.grid[nRows-1][i] = temp;
+            let temp = this.random_color();
+            if (program_state.animation_time % 10000 == 0)
+                console.log(temp);
+            if (this.grid[nRows-1][i] == -1)
+                this.grid[nRows-1][i] = Math.floor(temp);
+            
         }
-        this.draw_cube(context, program_state, hex_color("#00ffff"));
+        if ( ! this.test ){
+            console.log("inside add");
+            this.new_T();
+            this.test = true;
+        }
+        this.draw_cube(context, program_state);
         // Example for drawing a cube, you can remove this line if needed
         // this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic);
         // model_transform = model_transform.times(Mat4.translation(0, 2, 0));
