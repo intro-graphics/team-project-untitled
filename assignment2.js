@@ -5,6 +5,7 @@ let nCols = 20;
 let EMPTY = -1
 let BORDER = -2
 let FILLED = 99
+let counter = 0.0
 
 
 const {
@@ -150,7 +151,17 @@ export class Assignment2 extends Base_Scene {
         this.obj = [];
         this.test = false;
         this.get_color()
+        this.cubes = {
+            ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
+            SShape: [[0, -1], [0, 0], [1, 0], [1, 1]],
+            IShape: [[0, -1], [0, 0], [0, 1], [0, 2]],
+            TShape: [[-1, 0], [0, 0], [1, 0], [0, 1]],
+            Square: [[0, 0], [1, 0], [0, 1], [1, 1]],
+            LShape: [[-1, -1], [0, -1], [0, 0], [0, 1]],
+            JShape: [[1, -1], [0, -1], [0, 0], [0, 1]]
+        };
         this.shapes.square = new defs.Square();
+        this.falling = {r:0,c:9,pos:this.cubes.ZShape}
         const shader = new defs.Fake_Bump_Map(1);
         this.textures = {
             rgb: new Texture("./assets/rgb.jpg"),
@@ -314,7 +325,40 @@ export class Assignment2 extends Base_Scene {
         }
     }
 
-    
+    canMove(){
+       
+        for (let arr of this.falling.pos){
+        var newCol = this.falling.c + arr[0];
+         var newRow = this.falling.r + 1 + arr[1];
+         if (this.grid[newRow][newCol] !== EMPTY){
+             return false
+         }
+        }
+        return true;
+    }
+    draw_falling_shape(context, program_state,shape){
+        
+        for (let arr of shape.pos){
+            var x = shape.c + arr[0] - .5 * nRows;
+            var y = 15 - (shape.r + arr[1]) - 1;
+            let model_transform = Mat4.translation(x*2, y*2, 0);
+            this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: hex_color("#ff0000")}));
+            this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
+        }
+  
+     
+        
+    }
+    addShapetoGrid(){
+        
+        for (let arr of this.falling.pos){
+            var newCol = this.falling.c + arr[0];
+             var newRow = this.falling.r + arr[1];
+             this.grid[newRow][newCol] = FILLED
+        }
+        //console.log(this.grid)
+        
+    }
     display(context, program_state) {
         super.display(context, program_state);
         if (!context.scratchpad.controls) {
@@ -347,12 +391,27 @@ export class Assignment2 extends Base_Scene {
             this.test = true;
         }
         this.draw_cube(context, program_state);
-        // Example for drawing a cube, you can remove this line if needed
-        // this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic);
-        // model_transform = model_transform.times(Mat4.translation(0, 2, 0));
-      
-        // this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color:hex_color("#00FF00")}));
+            let temp = this.random_color;
+            //console.log(temp);
+            this.grid[nRows-1][i] = temp;
         
-        // TODO:  Draw your entire scene here.  Use this.draw_box( graphics_state, model_transform ) to call your helper.
+        //this.draw_cube(context, program_state, hex_color("#00ffff"));
+        // var x = shape.c - .5 * nRows;
+        // var y = 15 - this.r - 1;
+        // let model_transform = Mat4.translation(x*2, y*2, 0);
+        // this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: hex_color("#ff0000")}));
+        // this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
+        let t = program_state.animation_time / 1000
+        if(t>counter){
+            if(this.canMove()){
+                this.falling.r = this.falling.r+1
+            }
+            else{
+                this.addShapetoGrid()
+            }
+            counter = t+1
+        }
+        this.draw_falling_shape(context, program_state,this.falling)
+       
     }
 }
