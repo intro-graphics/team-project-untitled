@@ -224,7 +224,6 @@ export class Assignment2 extends Base_Scene {
     {
         let num = 1 + Math.floor(7 * Math.random());
         let shape = this.shape_t;
-
         // let y = 1 + Math.floor((nCols - 4) * Math.random());
         // let x = 1;
         var next_shape;
@@ -414,10 +413,36 @@ export class Assignment2 extends Base_Scene {
 
         }
 
+        let counter_base = 0;
+        let last = -1;
+        for (let i = 1; i < nCols - 1; i++){ // count the last row (for elimination)
+            if (this.grid[18][i] !== -1 && counter_base !== nCols)
+                counter_base += 1;
+        }
+
+        if (counter_base === nCols-2) // cube elimination part
+        {
+            
+            for (let i = 1; i < nCols - 1; i++)
+            {
+                this.grid[18][i] = -1;
+            }
+
+            for (let i = 1; i < nCols - 1; i++)
+            {
+                for (let j = nRows - 2; j > 1; j--)
+                {
+                    this.grid[j][i] = this.grid[j-1][i];
+                }
+            }
+            console.log(this.grid);
+        }
+        
+
         this.draw_cube(context, program_state);
 
 
-            if ( this.addNext && this.totalobj <=5 ){
+            if ( this.addNext && this.totalobj <= 10 ){
                 // console.log("inside add");
                 this.resetFallingShape()
                 this.gene_new_obj();
