@@ -9,6 +9,7 @@ import {Text_Demo} from "./examples/text-demo.js"
 import {Transforms_Sandbox} from "./examples/transforms-sandbox.js"
 import {Frame} from "./frame.js"
 import {Test_Demo} from "./tetris.js"
+import {Assignment2} from "./assignment2.js"
 
 // Pull these names into this module's scope for convenience:
 const {
@@ -34,13 +35,14 @@ Object.assign(defs,
     {Scene_To_Texture_Demo},
     {Surfaces_Demo},
     {Text_Demo},
-    {Transforms_Sandbox});
+    {Transforms_Sandbox},
+    {Assignment2});
 
 // ******************** End extra step
 
 // (Can define Main_Scene's class here)
 
 
-const Main_Scene = Test_Demo;
+const Main_Scene = Assignment2;
 const Additional_Scenes = [];
 export {Main_Scene, Additional_Scenes, Canvas_Widget, Code_Widget, Text_Widget, defs}
