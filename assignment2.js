@@ -6,6 +6,7 @@ let EMPTY = -1
 let BORDER = -2
 let FILLED = 99
 
+
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4, Light, Shape, Material, Scene,Shader, Texture,
 } = tiny;
@@ -135,12 +136,20 @@ export class Assignment2 extends Base_Scene {
         this.is_outline = false;
         this.is_odd = true;
         // this.set_colors()
+        this.shape_t = 
+        {
+            ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
+            SShape: [[0, -1], [0, 0], [1, 0], [1, 1]],
+            IShape: [[0, -1], [0, 0], [0, 1], [0, 2]],
+            TShape: [[-1, 0], [0, 0], [1, 0], [0, 1]],
+            Square: [[0, 0], [1, 0], [0, 1], [1, 1]],
+            LShape: [[-1, -1], [0, -1], [0, 0], [0, 1]],
+            JShape: [[1, -1], [0, -1], [0, 0], [0, 1]],
+        };
         this.grid = this.initGrid();
         this.obj = [];
         this.test = false;
-//         this.new_T()
         this.get_color()
-        this.gene_new_obj()
         this.shapes.square = new defs.Square();
         const shader = new defs.Fake_Bump_Map(1);
         this.textures = {
@@ -150,17 +159,18 @@ export class Assignment2 extends Base_Scene {
             stars: new Texture("./assets/stars.png"),
             text: new Texture("./assets/text.png"),
         }
+
+        
+
         this.material = new Material(shader, {
             color: hex_color('#000000'),
             ambient: 1, texture: new Texture("./assets/stars.png")
         })
-//         this.colors = [
-//             hex_color("#ff0000"),
-//             hex_color("#00ff00"),
-//             hex_color("#0000ff"),
-//             hex_color("#fcd303"),
-//         ]
+
+
     }
+
+
 
     random_color() {
         // random_shape():  Extract a random shape from this.shapes.
@@ -182,24 +192,59 @@ export class Assignment2 extends Base_Scene {
         return color;
     }
 
-    new_T() {
+
+
+    new_T() // new object generator template (currently not in use)
+    {
         let y = 1 + Math.floor((nCols - 4) * Math.random());
         let x = 1;
+        let shape = this.shape_t;
         // x y will be the bottom left corner of the generated T shape
         let temp = this.random_color();
-        let Tshape = [[x, y], [x, y+1], [x-1, y+1], [x, y+2]];
-        for ( var i = 0; i < 4; i++){
-            console.log(Tshape[i][0]);
-            this.grid[Tshape[i][0]][Tshape[i][1]] = temp;
+        for ( var i = 0; i < 4; i++)
+        {
+            this.grid[shape.Square[i][0] + x][shape.Square[i][1] + y] = temp;
         }
-        this.obj.push(Tshape);
+//         this.obj.push(Tshape);
     }
 
-    gene_new_obj() {
+
+    gene_new_obj() 
+    {
         let num = 1 + Math.floor(7 * Math.random());
+        let shape = this.shape_t;
+
+        let y = 1 + Math.floor((nCols - 4) * Math.random());
+        let x = 1;
+        var next_shape;
         switch(num){
             case 1:
-                this.new_T();
+                next_shape = shape.ZShape;
+                break;
+            case 2:
+                next_shape = shape.SShape;
+                break;
+            case 3:
+                next_shape = shape.IShape;
+                break;
+            case 4:
+                next_shape = shape.TShape;
+                break;
+            case 5:
+                next_shape = shape.SShape;
+                break;
+            case 6:
+                next_shape = shape.LShape;
+                break;
+            case 7:
+                next_shape = shape.JShape;
+                break;
+        }
+        console.log(num);
+        let temp = this.random_color();
+        for ( var i = 0; i < 4; i++)
+        {
+            this.grid[next_shape[i][0] + x][next_shape[i][1] + y] = 99;
         }
     }
 
@@ -298,7 +343,7 @@ export class Assignment2 extends Base_Scene {
         }
         if ( ! this.test ){
             console.log("inside add");
-            this.new_T();
+            this.gene_new_obj();
             this.test = true;
         }
         this.draw_cube(context, program_state);
