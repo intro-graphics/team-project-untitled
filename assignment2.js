@@ -136,6 +136,7 @@ export class Assignment2 extends Base_Scene {
         this.is_still = false;
         this.is_outline = false;
         this.is_odd = true;
+        this.totalobj = 0;
         // this.set_colors()
         this.shape_t = 
         {
@@ -149,7 +150,7 @@ export class Assignment2 extends Base_Scene {
         };
         this.grid = this.initGrid();
         this.obj = [];
-        this.test = false;
+        this.addNext = true;
         this.get_color()
         this.cubes = {
             ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
@@ -225,8 +226,8 @@ export class Assignment2 extends Base_Scene {
         let num = 1 + Math.floor(7 * Math.random());
         let shape = this.shape_t;
 
-        let y = 1 + Math.floor((nCols - 4) * Math.random());
-        let x = 1;
+        // let y = 1 + Math.floor((nCols - 4) * Math.random());
+        // let x = 1;
         var next_shape;
         switch(num){
             case 1:
@@ -251,12 +252,13 @@ export class Assignment2 extends Base_Scene {
                 next_shape = shape.JShape;
                 break;
         }
-        console.log(num);
-        let temp = this.random_color();
-        for ( var i = 0; i < 4; i++)
-        {
-            this.grid[next_shape[i][0] + x][next_shape[i][1] + y] = 99;
-        }
+        this.falling.pos = next_shape;
+        // console.log(num);
+        // let temp = this.random_color();
+        // for ( var i = 0; i < 4; i++)
+        // {
+        //     this.grid[next_shape[i][0] + x][next_shape[i][1] + y] = 99;
+        // }
     }
 
     initGrid() {
@@ -302,7 +304,10 @@ export class Assignment2 extends Base_Scene {
         });
     }
 
-
+    resetFallingShape(){
+        this.falling.r = 0
+        this.falling.c = 9
+    }
 
     draw_cube(context, program_state){
         for (var i = 0; i < nCols; i++){
@@ -356,6 +361,7 @@ export class Assignment2 extends Base_Scene {
              var newRow = this.falling.r + arr[1];
              this.grid[newRow][newCol] = FILLED
         }
+        this.addNext = true;
         //console.log(this.grid)
         
     }
@@ -385,22 +391,20 @@ export class Assignment2 extends Base_Scene {
                 this.grid[nRows-1][i] = Math.floor(temp);
             
         }
-        if ( ! this.test ){
-            console.log("inside add");
-            this.gene_new_obj();
-            this.test = true;
-        }
-        this.draw_cube(context, program_state);
-            let temp = this.random_color;
-            //console.log(temp);
-            this.grid[nRows-1][i] = temp;
         
-        //this.draw_cube(context, program_state, hex_color("#00ffff"));
-        // var x = shape.c - .5 * nRows;
-        // var y = 15 - this.r - 1;
-        // let model_transform = Mat4.translation(x*2, y*2, 0);
-        // this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: hex_color("#ff0000")}));
-        // this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
+        this.draw_cube(context, program_state);
+           
+
+            if ( this.addNext && this.totalobj <=5 ){
+                console.log("inside add");
+                this.resetFallingShape()
+                this.gene_new_obj();
+                this.addNext = false;
+                this.totalobj++;
+                //console.log(this.grid)
+            }
+        
+       
         let t = program_state.animation_time / 1000
         if(t>counter){
             if(this.canMove()){
