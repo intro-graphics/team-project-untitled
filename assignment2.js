@@ -39,28 +39,28 @@ class Cube_Outline extends Shape {
         // broken down into pairs; each pair of vertices will be drawn as a line segment.
         // Note: since the outline is rendered with Basic_shader, you need to redefine the position and color of each vertex
         this.arrays.position = Vector3.cast(
-            [-1, -1, -1], [1, -1, -1], 
-            [-1, -1, 1], [1, -1, 1], 
-            [1, 1, -1], [-1, 1, -1], 
+            [-1, -1, -1], [1, -1, -1],
+            [-1, -1, 1], [1, -1, 1],
+            [1, 1, -1], [-1, 1, -1],
             [1, 1, 1], [-1, 1, 1],
             [-1, -1, -1], [-1, -1, 1],
              [-1, 1, -1], [-1, 1, 1],
-              [1, -1, 1], [1, -1, -1], 
+              [1, -1, 1], [1, -1, -1],
               [1, 1, 1], [1, 1, -1],
               [-1,-1,1],[-1,1,1],
               [-1,-1,-1],[-1,1,-1],
               [1,-1,1],[1,1,1],
               [1,-1,-1],[1,1,-1]
             );
-        
-       
+
+
         let white = color(1.0,1.0,1.0,1.0)
         this.arrays.color = [];
         for(let i=0;i<24;i++){
             this.arrays.color.push(white);
         }
         this.indices = false;
-        
+
     }
 
 }
@@ -72,10 +72,10 @@ class Cube_Single_Strip extends Shape {
         this.arrays.position = Vector3.cast(
               [-1,-1,1],[1,-1,1],[1,-1,-1],[-1,-1,-1],[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]
             );
-        
+
         this.arrays.normal = this.arrays.position;
         this.indices = [0,1,3,2,4,7,5,6,0,1,6,2,7,4,3,5,0]
-      
+
     }
 }
 
@@ -138,7 +138,7 @@ export class Assignment2 extends Base_Scene {
         this.is_odd = true;
         this.totalobj = 0;
         // this.set_colors()
-        this.shape_t = 
+        this.shape_t =
         {
             ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
             SShape: [[0, -1], [0, 0], [1, 0], [1, 1]],
@@ -151,7 +151,7 @@ export class Assignment2 extends Base_Scene {
         this.grid = this.initGrid();
         this.obj = [];
         this.addNext = true;
-        
+
         this.cubes = {
             ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
             SShape: [[0, -1], [0, 0], [1, 0], [1, 1]],
@@ -172,7 +172,7 @@ export class Assignment2 extends Base_Scene {
             text: new Texture("./assets/text.png"),
         }
 
-        
+
 
         this.material = new Material(shader, {
             color: hex_color('#000000'),
@@ -190,7 +190,7 @@ export class Assignment2 extends Base_Scene {
     }
 
     get_color(index) {
-        var color;
+        let color;
         if (index === 0){
             color = hex_color("#ff0000");
         } else if (index === 1 ) {
@@ -220,7 +220,7 @@ export class Assignment2 extends Base_Scene {
     }
 
 
-    gene_new_obj() 
+    gene_new_obj()
     {
         let num = 1 + Math.floor(7 * Math.random());
         let shape = this.shape_t;
@@ -269,7 +269,7 @@ export class Assignment2 extends Base_Scene {
         let grid = [];
         // let nRows = 10;
         // let nCols = 18;
-        for (let r = 0; r < nRows; r++) {
+        for (let r = -1; r < nRows; r++) {
             grid[r] = new Array(nCols);
             fill(grid[r], -1);
             for (let c = 0; c < nCols; c++) {
@@ -279,7 +279,7 @@ export class Assignment2 extends Base_Scene {
         }
         return grid;
     }
-    
+
 
     make_control_panel() {
         this.key_triggered_button("Rotate", ["ArrowUp"], () => {
@@ -368,7 +368,7 @@ export class Assignment2 extends Base_Scene {
     }
 
     draw_falling_shape(context, program_state,shape){
-        
+
         for (let arr of shape.pos){
             let x = shape.c + arr[0] - .5 * nRows;
             let y = 15 - (shape.r + arr[1]) - 1;
@@ -380,7 +380,7 @@ export class Assignment2 extends Base_Scene {
 
     }
     addShapetoGrid(){
-        
+
         for (let arr of this.falling.pos){
             let newCol = this.falling.c + arr[0];
              let newRow = this.falling.r + arr[1];
@@ -388,7 +388,7 @@ export class Assignment2 extends Base_Scene {
         }
         this.addNext = true;
         //console.log(this.grid)
-        
+
     }
     display(context, program_state) {
         super.display(context, program_state);
@@ -397,7 +397,7 @@ export class Assignment2 extends Base_Scene {
             this.children.push(new defs.Program_State_Viewer());
             program_state.set_camera(Mat4.translation(0, 0, -75));    // Locate the camera here (inverted matrix).
         }
-        //program_state.set_camera(Mat4.translation(0, 0, -50));  
+        //program_state.set_camera(Mat4.translation(0, 0, -50));
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
         program_state.lights = [new Light(vec4(0, -5, -10, 1), color(1, 1, 1, 1), 100000)];
         // Draw the ground:
@@ -407,26 +407,26 @@ export class Assignment2 extends Base_Scene {
 
         for (let i = 1; i < nCols - 1; i++){
             let temp = this.random_color();
-            if (program_state.animation_time % 10000 === 0)
-                console.log(temp);
+            // if (program_state.animation_time % 10000 === 0)
+            //     console.log(temp);
             if (this.grid[nRows-1][i] === -1)
                 this.grid[nRows-1][i] = temp;
-            
+
         }
-        
+
         this.draw_cube(context, program_state);
-           
+
 
             if ( this.addNext && this.totalobj <=5 ){
-                console.log("inside add");
+                // console.log("inside add");
                 this.resetFallingShape()
                 this.gene_new_obj();
                 this.falling.color_i = this.random_color();
                 this.addNext = false;
                 this.totalobj++;
             }
-        
-       
+
+
         let t = program_state.animation_time / 1000
         if(t>counter){
             if(this.canMove([0,1])){
@@ -438,6 +438,6 @@ export class Assignment2 extends Base_Scene {
             counter = t+1
         }
         this.draw_falling_shape(context, program_state,this.falling)
-       
+
     }
 }
