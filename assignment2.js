@@ -138,7 +138,7 @@ export class Assignment2 extends Base_Scene {
         this.grid = this.initGrid();
         this.obj = [];
         this.test = false;
-        this.new_T()
+//         this.new_T()
         this.get_color()
         this.gene_new_obj()
         this.shapes.square = new defs.Square();
