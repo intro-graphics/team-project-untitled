@@ -2,11 +2,15 @@ import {defs, tiny} from './examples/common.js';
 
 let nRows = 20;
 let nCols = 20;
-let EMPTY = -1
-let BORDER = -2
-let FILLED = 99
-let counter = 0.0
+let EMPTY = -1;
+let BORDER = -2;
+let FILLED = 99;
+let counter = 0.0;
 
+// BGM part, uncomment to have BGM upon opening
+// var audio = new Audio();
+// audio.src = "./assets/Tetris.mp3"
+// audio.autoplay = true;
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4, Light, Shape, Material, Scene,Shader, Texture,
@@ -34,35 +38,29 @@ class Cube extends Shape {
 class Cube_Outline extends Shape {
     constructor() {
         super("position", "color");
-        //  TODO (Requirement 5).
-        // When a set of lines is used in graphics, you should think of the list entries as
-        // broken down into pairs; each pair of vertices will be drawn as a line segment.
-        // Note: since the outline is rendered with Basic_shader, you need to redefine the position and color of each vertex
         this.arrays.position = Vector3.cast(
             [-1, -1, -1], [1, -1, -1],
             [-1, -1, 1], [1, -1, 1],
             [1, 1, -1], [-1, 1, -1],
             [1, 1, 1], [-1, 1, 1],
             [-1, -1, -1], [-1, -1, 1],
-             [-1, 1, -1], [-1, 1, 1],
-              [1, -1, 1], [1, -1, -1],
-              [1, 1, 1], [1, 1, -1],
-              [-1,-1,1],[-1,1,1],
-              [-1,-1,-1],[-1,1,-1],
-              [1,-1,1],[1,1,1],
-              [1,-1,-1],[1,1,-1]
-            );
+            [-1, 1, -1], [-1, 1, 1],
+            [1, -1, 1], [1, -1, -1],
+            [1, 1, 1], [1, 1, -1],
+            [-1, -1, 1], [-1, 1, 1],
+            [-1, -1, -1], [-1, 1, -1],
+            [1, -1, 1], [1, 1, 1],
+            [1, -1, -1],[1, 1, -1]
+        );
 
 
         let white = color(1.0,1.0,1.0,1.0)
         this.arrays.color = [];
-        for(let i=0;i<24;i++){
+        for(let i = 0; i < 24; i++){
             this.arrays.color.push(white);
         }
         this.indices = false;
-
     }
-
 }
 
 class Cube_Single_Strip extends Shape {
@@ -152,17 +150,8 @@ export class Assignment2 extends Base_Scene {
         this.obj = [];
         this.addNext = true;
 
-        this.cubes = {
-            ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
-            SShape: [[0, -1], [0, 0], [1, 0], [1, 1]],
-            IShape: [[0, -1], [0, 0], [0, 1], [0, 2]],
-            TShape: [[-1, 0], [0, 0], [1, 0], [0, 1]],
-            Square: [[0, 0], [1, 0], [0, 1], [1, 1]],
-            LShape: [[-1, -1], [0, -1], [0, 0], [0, 1]],
-            JShape: [[1, -1], [0, -1], [0, 0], [0, 1]]
-        };
         this.shapes.square = new defs.Square();
-        this.falling = {r:0,c:9,pos:this.cubes.ZShape,color_i:0}
+        this.falling = {r:0,c:9,pos:this.shape_t.ZShape,color_i:0}
         const shader = new defs.Fake_Bump_Map(1);
         this.textures = {
             rgb: new Texture("./assets/rgb.jpg"),
@@ -178,14 +167,9 @@ export class Assignment2 extends Base_Scene {
             color: hex_color('#000000'),
             ambient: 1, texture: new Texture("./assets/stars.png")
         })
-
-
     }
 
-
-
     random_color() {
-        // random_shape():  Extract a random shape from this.shapes.
         return Math.floor(4 * Math.random());
     }
 
@@ -203,8 +187,6 @@ export class Assignment2 extends Base_Scene {
         return color;
     }
 
-
-
     new_T() // new object generator template (currently not in use)
     {
         let y = 1 + Math.floor((nCols - 4) * Math.random());
@@ -216,18 +198,14 @@ export class Assignment2 extends Base_Scene {
         {
             this.grid[shape.Square[i][0] + x][shape.Square[i][1] + y] = temp;
         }
-//         this.obj.push(Tshape);
     }
-
 
     gene_new_obj()
     {
         let num = 1 + Math.floor(7 * Math.random());
         let shape = this.shape_t;
-
-        // let y = 1 + Math.floor((nCols - 4) * Math.random());
-        // let x = 1;
         var next_shape;
+        
         switch(num){
             case 1:
                 next_shape = shape.ZShape;
@@ -252,12 +230,6 @@ export class Assignment2 extends Base_Scene {
                 break;
         }
         this.falling.pos = next_shape;
-        // console.log(num);
-        // let temp = this.random_color();
-        // for ( var i = 0; i < 4; i++)
-        // {
-        //     this.grid[next_shape[i][0] + x][next_shape[i][1] + y] = 99;
-        // }
     }
 
     initGrid() {
@@ -267,8 +239,6 @@ export class Assignment2 extends Base_Scene {
             }
         }
         let grid = [];
-        // let nRows = 10;
-        // let nCols = 18;
         for (let r = -1; r < nRows; r++) {
             grid[r] = new Array(nCols);
             fill(grid[r], -1);
@@ -387,8 +357,6 @@ export class Assignment2 extends Base_Scene {
              this.grid[newRow][newCol] = this.falling.color_i
         }
         this.addNext = true;
-        //console.log(this.grid)
-
     }
 
     eliminateRows(){
@@ -398,7 +366,6 @@ export class Assignment2 extends Base_Scene {
             let should_eliminate = true;
             for (var i = 1; i < 19; i++){
                 if (this.grid[row][i] == -1){
-                    console.log(this.grid[row][i]);
                     should_eliminate = false;
                 }
             }
@@ -421,7 +388,6 @@ export class Assignment2 extends Base_Scene {
         // current height of grid is 20, if reach 18, gameover
         for (var i = 1; i < 19; i++){
             if (this.grid[1][i] != -1){
-                console.log(this.grid[1][i])
                 this.over = true;
             }
         }
