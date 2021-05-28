@@ -172,7 +172,7 @@ export class Assignment2 extends Base_Scene {
             text: new Texture("./assets/text.png"),
         }
 
-
+        this.over = false;
 
         this.material = new Material(shader, {
             color: hex_color('#000000'),
@@ -273,7 +273,7 @@ export class Assignment2 extends Base_Scene {
             grid[r] = new Array(nCols);
             fill(grid[r], -1);
             for (let c = 0; c < nCols; c++) {
-                if (c === 0 || c === nCols - 1)
+                if (c === 0 || c === nCols - 1 || r === nRows - 1)
                     grid[r][c] = -2;
             }
         }
@@ -390,6 +390,43 @@ export class Assignment2 extends Base_Scene {
         //console.log(this.grid)
 
     }
+
+    eliminateRows(){
+        // eliminate rows from bottom if the row is filled
+        let start_row = -1;
+        for (var row = 18; row >= 0; row--){
+            let should_eliminate = true;
+            for (var i = 1; i < 19; i++){
+                if (this.grid[row][i] == -1){
+                    console.log(this.grid[row][i]);
+                    should_eliminate = false;
+                }
+            }
+            if ( should_eliminate ){
+                start_row = row;
+                break;
+            }
+        }   
+        if (start_row != -1){
+            for (var i = start_row; i > 0; i--){
+                this.grid[i] = this.grid[i-1];
+            }
+            for (var j = 1; j < 19; j++){
+                this.grid[0][j] = -1;
+            }
+        }
+    }
+
+    check_continue(){
+        // current height of grid is 20, if reach 18, gameover
+        for (var i = 1; i < 19; i++){
+            if (this.grid[1][i] != -1){
+                console.log(this.grid[1][i])
+                this.over = true;
+            }
+        }
+    }
+
     display(context, program_state) {
         super.display(context, program_state);
         if (!context.scratchpad.controls) {
@@ -405,39 +442,42 @@ export class Assignment2 extends Base_Scene {
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 1)),
             this.material);
 
-        for (let i = 1; i < nCols - 1; i++){
-            let temp = this.random_color();
-            // if (program_state.animation_time % 10000 === 0)
-            //     console.log(temp);
-            if (this.grid[nRows-1][i] === -1)
-                this.grid[nRows-1][i] = temp;
+        // for (let i = 1; i < nCols - 1; i++){
+        //     // let temp = this.random_color();
+        //     // if (program_state.animation_time % 10000 === 0)
+        //     //     console.log(temp);
+        //     if (this.grid[nRows-1][i] === -1)
+        //         this.grid[nRows-1][i] = -2;
 
-        }
+        // }
 
         this.draw_cube(context, program_state);
 
-
-            if ( this.addNext && this.totalobj <=5 ){
+        if ( !this.over ){
+            if ( this.addNext){
                 // console.log("inside add");
                 this.resetFallingShape()
                 this.gene_new_obj();
                 this.falling.color_i = this.random_color();
                 this.addNext = false;
-                this.totalobj++;
+                // this.totalobj++;
             }
 
 
-        let t = program_state.animation_time / 1000
-        if(t>counter){
-            if(this.canMove([0,1])){
-                this.move([0,1]);
+            let t = program_state.animation_time / 1000
+            if(t>counter){
+                if(this.canMove([0,1])){
+                    this.move([0,1]);
+                }
+                else{
+                    this.addShapetoGrid();
+                    this.eliminateRows();
+                    this.check_continue();
+                }
+                counter = t+1
             }
-            else{
-                this.addShapetoGrid()
-            }
-            counter = t+1
-        }
-        this.draw_falling_shape(context, program_state,this.falling)
+            this.draw_falling_shape(context, program_state,this.falling)
+        }  
 
     }
 }
