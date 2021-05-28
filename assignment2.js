@@ -289,10 +289,10 @@ export class Assignment2 extends Base_Scene {
         let grid = [];
         for (let r = -1; r < nRows; r++) {
             grid[r] = new Array(nCols);
-            fill(grid[r], -1);
+            fill(grid[r], EMPTY);
             for (let c = 0; c < nCols; c++) {
                 if (c === 0 || c === nCols - 1 || r === nRows - 1)
-                    grid[r][c] = -2;
+                    grid[r][c] = BORDER;
             }
         }
         return grid;
@@ -327,12 +327,12 @@ export class Assignment2 extends Base_Scene {
     draw_cube(context, program_state){
         for (let i = 0; i < nCols; i++){
             for (let j = 0; j < nRows; j++){
-                if ( this.grid[i][j] === -2 ){
+                if ( this.grid[i][j] === BORDER ){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
-                } else if ( this.grid[i][j] !== -1 ){
+                } else if ( this.grid[i][j] !== EMPTY ){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
@@ -409,33 +409,32 @@ export class Assignment2 extends Base_Scene {
 
     eliminateRows(){
         // eliminate rows from bottom if the row is filled
-        let start_row = -1;
-        for (var row = 18; row >= 0; row--){
+        for (let row = 18; row >= 0; row--){
             let should_eliminate = true;
-            for (var i = 1; i < 19; i++){
-                if (this.grid[row][i] == -1){
+            for (let i = 1; i < 19; i++){
+                // if any grid is empty, false
+                if (this.grid[row][i] === EMPTY){
                     should_eliminate = false;
                 }
             }
             if ( should_eliminate ){
-                start_row = row;
-                break;
-            }
-        }   
-        if (start_row != -1){
-            for (var i = start_row; i > 0; i--){
-                this.grid[i] = this.grid[i-1];
-            }
-            for (var j = 1; j < 19; j++){
-                this.grid[0][j] = -1;
+                // this moves a entire row down
+                for (let i = row; i > 0; i--){
+                    this.grid[i] = this.grid[i-1];
+                }
+                // this is used to make sure the top row is correct
+                for (let j = 1; j < 19; j++){
+                    this.grid[0][j] = EMPTY;
+                }
+                row = row + 1; // reduce the number of checked row
             }
         }
     }
 
     check_continue(){
         // current height of grid is 20, if reach 18, gameover
-        for (var i = 1; i < 19; i++){
-            if (this.grid[1][i] != -1){
+        for (let i = 1; i < 19; i++){
+            if (this.grid[1][i] !== EMPTY){
                 this.over = true;
             }
         }
