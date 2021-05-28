@@ -78,7 +78,7 @@ class Cube extends Shape {
 }
 
 class Cube_Outline extends Shape {
-    constructor() {
+    constructor(color) {
         super("position", "color");
         this.arrays.position = Vector3.cast(
             [-1, -1, -1], [1, -1, -1],
@@ -95,11 +95,9 @@ class Cube_Outline extends Shape {
             [1, -1, -1],[1, 1, -1]
         );
 
-
-        let white = color(1.0,1.0,1.0,1.0)
         this.arrays.color = [];
         for(let i = 0; i < 24; i++){
-            this.arrays.color.push(white);
+            this.arrays.color.push(color);
         }
         this.indices = false;
     }
@@ -112,7 +110,6 @@ class Cube_Single_Strip extends Shape {
         this.arrays.position = Vector3.cast(
               [-1,-1,1],[1,-1,1],[1,-1,-1],[-1,-1,-1],[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]
             );
-
         this.arrays.normal = this.arrays.position;
         this.indices = [0,1,3,2,4,7,5,6,0,1,6,2,7,4,3,5,0]
 
@@ -126,40 +123,59 @@ class Base_Scene extends Scene {
      *  Setup the shapes, materials, camera, and lighting here.
      */
     constructor() {
-        // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
-        this.hover = this.swarm = false;
+        // this.hover = this.swarm = false;
+
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
             'cube': new Cube(),
-            'outline': new Cube_Outline(),
+            'outline': new Cube_Outline(color(1,1,1,1)),
+            'base' : new Cube_Outline(color(0.6,0.6,0.6,1)),
             'strip': new Cube_Single_Strip(),
-            'text': new Text_Line(35)
+            'text': new Text_Line(35),
+            'square': new defs.Square(),
         };
 
+        this.shape_t =
+        {
+            ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
+            SShape: [[0, -1], [0, 0], [1, 0], [1, 1]],
+            IShape: [[0, -1], [0, 0], [0, 1], [0, 2]],
+            TShape: [[-1, 0], [0, 0], [1, 0], [0, 1]],
+            Square: [[0, 0], [1, 0], [0, 1], [1, 1]],
+            LShape: [[-1, -1], [0, -1], [0, 0], [0, 1]],
+            JShape: [[1, -1], [0, -1], [0, 0], [0, 1]],
+        };
         // *** Materials
+        const shader = new defs.Fake_Bump_Map(1);
+        const texture = new defs.Textured_Phong(1);
+
         this.materials = {
             plastic: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#FF0000")}),
+            white : new Material(new defs.Basic_Shader()),
+            ground: new Material(shader, {
+                color: hex_color('#000000'),
+                ambient: 0.7, texture: new Texture("./assets/stars.png")
+            }),
+            text_image : new Material(texture, {
+                ambient: 1, diffusivity: 0, specularity: 0,
+                texture: new Texture("assets/text.png")
+            }),
         };
-        // The white material and basic shader are used for drawing the outline.
-        this.white = new Material(new defs.Basic_Shader());
+
+        this.textures = {
+            rgb: new Texture("./assets/rgb.jpg"),
+            earth: new Texture("./assets/earth.gif"),
+            // grid: new Texture("assets/grid.png"),
+            stars: new Texture("./assets/stars.png"),
+            text: new Texture("./assets/text.png"),
+        }
     }
 
     display(context, program_state) {
-        // display():  Called once per frame of animation. Here, the base class's display only does
-        // some initial setup.
-
-        // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
-        // if (!context.scratchpad.controls) {
-        //     this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-        //     // Define the global camera and projection matrices, which are stored in program_state.
-        //     program_state.set_camera(Mat4.translation(5, -10, -30));
-        // }
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
-
-        // *** Lights: *** Values of vector or point lights.
         const light_position = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
     }
@@ -174,47 +190,18 @@ export class Assignment2 extends Base_Scene {
      */
     constructor(){
         super();
-        this.is_still = false;
-        this.is_outline = false;
-        this.is_odd = true;
-        this.totalobj = 0;
-        // this.set_colors()
-        this.shape_t =
-        {
-            ZShape: [[0, -1], [0, 0], [-1, 0], [-1, 1]],
-            SShape: [[0, -1], [0, 0], [1, 0], [1, 1]],
-            IShape: [[0, -1], [0, 0], [0, 1], [0, 2]],
-            TShape: [[-1, 0], [0, 0], [1, 0], [0, 1]],
-            Square: [[0, 0], [1, 0], [0, 1], [1, 1]],
-            LShape: [[-1, -1], [0, -1], [0, 0], [0, 1]],
-            JShape: [[1, -1], [0, -1], [0, 0], [0, 1]],
-        };
+        // this.is_still = false;
+        // this.is_outline = false;
+        // this.is_odd = true;
+        // this.totalobj = 0;
+        // // this.set_colors()
+
         this.grid = this.initGrid();
-        this.obj = [];
         this.addNext = true;
 
-        this.shapes.square = new defs.Square();
         this.falling = {r:0,c:9,pos:this.shape_t.ZShape,color_i:0}
-        const shader = new defs.Fake_Bump_Map(1);
-        this.textures = {
-            rgb: new Texture("./assets/rgb.jpg"),
-            earth: new Texture("./assets/earth.gif"),
-            // grid: new Texture("assets/grid.png"),
-            stars: new Texture("./assets/stars.png"),
-            text: new Texture("./assets/text.png"),
-        }
 
         this.over = false;
-
-        this.material = new Material(shader, {
-            color: hex_color('#000000'),
-            ambient: 1, texture: new Texture("./assets/stars.png")
-        })
-        const texture = new defs.Textured_Phong(1);
-        this.text_image = new Material(texture, {
-            ambient: 1, diffusivity: 0, specularity: 0,
-            texture: new Texture("assets/text.png")
-        });
     }
 
     random_color() {
@@ -252,7 +239,7 @@ export class Assignment2 extends Base_Scene {
     {
         let num = 1 + Math.floor(7 * Math.random());
         let shape = this.shape_t;
-        var next_shape;
+        let next_shape;
         
         switch(num){
             case 1:
@@ -300,6 +287,7 @@ export class Assignment2 extends Base_Scene {
 
 
     make_control_panel() {
+        this.key_triggered_button("Default View", ["v"], () => this.attached = () => "origin");
         this.key_triggered_button("Rotate", ["ArrowUp"], () => {
             if(this.canRotate())
                 this.rotate(this.falling);
@@ -324,25 +312,58 @@ export class Assignment2 extends Base_Scene {
         this.falling.c = 9
     }
 
-    draw_cube(context, program_state){
+    draw_frame(context, program_state){
         for (let i = 0; i < nCols; i++){
             for (let j = 0; j < nRows; j++){
                 if ( this.grid[i][j] === BORDER ){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
-                    this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
+                    this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
                 } else if ( this.grid[i][j] !== EMPTY ){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     let color = this.get_color(this.grid[i][j]);
                     this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: color}));
-                    this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
+                    this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
                 }
 
             }
         }
+        let base = Mat4.identity().times(Mat4.translation(-15,-11,0)).times(Mat4.scale(1,0.01,1)); // the flattened base
+        for(let z = -10; z <= 11; z++){
+            for(let x = -4; x <= 19; x++){
+                this.shapes.base.draw(context, program_state, base.times(Mat4.translation(2*x-1,0,2*z-1)), this.materials.white, "LINES");
+            }
+        }
+    }
+
+    draw_background(context, program_state){
+        // ground:
+        this.shapes.square.draw(context, program_state, Mat4.translation(0, -50, 0)
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 1)),
+            this.materials.ground);
+        //back
+        this.shapes.square.draw(context, program_state, Mat4.translation(0, 0, -70)
+                .times(Mat4.scale(70, 70, 1)),
+            this.materials.ground);
+        //front
+        this.shapes.square.draw(context, program_state, Mat4.translation(0, 0, 70)
+                .times(Mat4.scale(70, 70, 1)),
+            this.materials.ground);
+        //up
+        this.shapes.square.draw(context, program_state, Mat4.translation(0, 70, 0)
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 1)),
+            this.materials.ground);
+        //left
+        this.shapes.square.draw(context, program_state, Mat4.translation(-70, 0, 0)
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 1)),
+            this.materials.ground);
+        //right
+        this.shapes.square.draw(context, program_state, Mat4.translation(70, 0, 0)
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 1)),
+            this.materials.ground);
     }
 
     canMove(dir){
@@ -393,11 +414,11 @@ export class Assignment2 extends Base_Scene {
             let model_transform = Mat4.translation(x*2, y*2, 0);
             let shape_color = this.get_color(shape.color_i)
             this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: shape_color}));
-            this.shapes.outline.draw(context, program_state, model_transform, this.white, "LINES");
+            this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
         }
 
     }
-    addShapetoGrid(){
+    addShapeToGrid(){
 
         for (let arr of this.falling.pos){
             let newCol = this.falling.c + arr[0];
@@ -443,35 +464,32 @@ export class Assignment2 extends Base_Scene {
     display(context, program_state) {
         super.display(context, program_state);
 
+        if(this.attached !== undefined) {
+            let desired = this.attached();
+            if(desired === "origin"){
+                desired = Mat4.translation(0, -5, -65);
+            }
+            desired = desired.map((x,i) => Vector.from( program_state.camera_inverse[i]).mix(x, 0.1));
+            program_state.set_camera(desired);
+        }
+
         // score display, according to the template in text-demo.js
         let score = "Score: 888";
         this.shapes.text.set_string(score, context.context);
-        this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.text_image);
+        this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.materials.text_image);
 
 
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             this.children.push(new defs.Program_State_Viewer());
-            program_state.set_camera(Mat4.translation(0, 0, -75));    // Locate the camera here (inverted matrix).
+            program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
         }
         //program_state.set_camera(Mat4.translation(0, 0, -50));
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
         program_state.lights = [new Light(vec4(0, -5, -10, 1), color(1, 1, 1, 1), 100000)];
-        // Draw the ground:
-        this.shapes.square.draw(context, program_state, Mat4.translation(0, -20, 0)
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 1)),
-            this.material);
 
-        // for (let i = 1; i < nCols - 1; i++){
-        //     // let temp = this.random_color();
-        //     // if (program_state.animation_time % 10000 === 0)
-        //     //     console.log(temp);
-        //     if (this.grid[nRows-1][i] === -1)
-        //         this.grid[nRows-1][i] = -2;
-
-        // }
-
-        this.draw_cube(context, program_state);
+        this.draw_frame(context, program_state);
+        this.draw_background(context, program_state);
 
         if ( !this.over ){
             if ( this.addNext){
@@ -490,7 +508,7 @@ export class Assignment2 extends Base_Scene {
                     this.move([0,1]);
                 }
                 else{
-                    this.addShapetoGrid();
+                    this.addShapeToGrid();
                     this.eliminateRows();
                     this.check_continue();
                 }
