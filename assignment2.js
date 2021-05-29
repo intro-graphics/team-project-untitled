@@ -1,5 +1,5 @@
 import {defs, tiny} from './examples/common.js';
-
+import {Color_Phong_Shader, Shadow_Textured_Phong_Shader,Buffered_Texture, LIGHT_DEPTH_TEX_SIZE} from './shadow-demo-shaders.js'
 let nRows = 20;
 let nCols = 20;
 let EMPTY = -1;
@@ -15,6 +15,7 @@ let counter = 0.0;
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4, Light, Shape, Material, Scene,Shader, Texture,
 } = tiny;
+const {Cube, Axis_Arrows, Textured_Phong, Phong_Shader, Basic_Shader, Subdivision_Sphere} = defs
 
 
 export class Text_Line extends Shape {                           // **Text_Line** embeds text in the 3D world, using a crude texture
@@ -59,23 +60,7 @@ export class Text_Line extends Shape {                           // **Text_Line*
     }
 }
 
-class Cube extends Shape {
-    constructor() {
-        super("position", "normal",);
-        // Loop 3 times (for each axis), and inside loop twice (for opposing cube sides):
-        this.arrays.position = Vector3.cast(
-            [-1, -1, -1], [1, -1, -1], [-1, -1, 1], [1, -1, 1], [1, 1, -1], [-1, 1, -1], [1, 1, 1], [-1, 1, 1],
-            [-1, -1, -1], [-1, -1, 1], [-1, 1, -1], [-1, 1, 1], [1, -1, 1], [1, -1, -1], [1, 1, 1], [1, 1, -1],
-            [-1, -1, 1], [1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, -1], [-1, -1, -1], [1, 1, -1], [-1, 1, -1]);
-        this.arrays.normal = Vector3.cast(
-            [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, -1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0], [0, 1, 0],
-            [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [-1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0], [1, 0, 0],
-            [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, 1], [0, 0, -1], [0, 0, -1], [0, 0, -1], [0, 0, -1]);
-        // Arrange the vertices into a square shape in texture space too:
-        this.indices.push(0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10, 12, 13,
-            14, 13, 15, 14, 16, 17, 18, 17, 19, 18, 20, 21, 22, 21, 23, 22);
-    }
-}
+
 
 class Cube_Outline extends Shape {
     constructor(color) {
@@ -117,18 +102,40 @@ class Cube_Single_Strip extends Shape {
 }
 
 
-class Base_Scene extends Scene {
-    /**
-     *  **Base_scene** is a Scene that can be added to any display canvas.
-     *  Setup the shapes, materials, camera, and lighting here.
-     */
-    constructor() {
-        super();
-        // this.hover = this.swarm = false;
+// class Base_Scene extends Scene {
+//     /**
+//      *  **Base_scene** is a Scene that can be added to any display canvas.
+//      *  Setup the shapes, materials, camera, and lighting here.
+//      */
+//     constructor() {
+//         super();
+//         // this.hover = this.swarm = false;
 
-        // At the beginning of our program, load one of each of these shape definitions onto the GPU.
+//         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
+      
+//     }
+
+//     display(context, program_state) {
+//         program_state.projection_transform = Mat4.perspective(
+//             Math.PI / 4, context.width / context.height, 1, 100);
+//         const light_position = vec4(0,15,0, 1);
+//         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+//     }
+// }
+
+export class Assignment2 extends Scene {
+    /**
+     * This Scene object can be added to any display canvas.
+     * We isolate that code so it can be experimented with on its own.
+     * This gives you a very small code sandbox for editing a simple scene, and for
+     * experimenting with matrix transformations.
+     */
+    constructor(){
+        super();
+       
         this.shapes = {
             'cube': new Cube(),
+            "sphere": new Subdivision_Sphere(6),
             'outline': new Cube_Outline(color(1,1,1,1)),
             'base' : new Cube_Outline(color(0.6,0.6,0.6,1)),
             'strip': new Cube_Single_Strip(),
@@ -152,12 +159,32 @@ class Base_Scene extends Scene {
 
         this.materials = {
             plastic: new Material(new defs.Phong_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#FF0000")}),
+                {ambient: 0.8, diffusivity: 1, color: color(1,1,1,1)}),
+            floor : new Material(new Shadow_Textured_Phong_Shader(1), {
+                    color: color(0.5, 1, 1, 1), ambient: 0.4, diffusivity: 0.6, 
+                    color_texture: null,
+                    light_depth_texture: null
+                }),
+            floor_2: new Material(new Shadow_Textured_Phong_Shader(1), {
+                    color: color(0.5, 1, 1, 1), ambient: .3, diffusivity: 0.6, specularity: 0.4, smoothness: 64,
+                    color_texture: null,
+                    light_depth_texture: null
+                }),
             white : new Material(new defs.Basic_Shader()),
-            ground: new Material(shader, {
-                color: hex_color('#000000'),
-                ambient: 0.7, texture: new Texture("./assets/stars.png")
+            pure : new Material(new Color_Phong_Shader(), {
             }),
+            light_src : new Material(new Phong_Shader(), {
+                color: color(1, 1, 1, 1), ambient: 1, diffusivity: 0, specularity: 0
+            }),
+            // ground: new Material(shader, {
+            //     color: hex_color('#000000'),
+            //     ambient: 0.7, texture: new Texture("./assets/stars.png")
+            // }),
+            ground: new Material(new Shadow_Textured_Phong_Shader(1), {
+                color: hex_color('#000000'),
+                ambient: 0.7, color_texture: new Texture("./assets/stars.png"),light_depth_texture: null
+            }),
+            
             text_image : new Material(texture, {
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
@@ -171,43 +198,87 @@ class Base_Scene extends Scene {
             stars: new Texture("./assets/stars.png"),
             text: new Texture("./assets/text.png"),
         }
-    }
-
-    display(context, program_state) {
-        program_state.projection_transform = Mat4.perspective(
-            Math.PI / 4, context.width / context.height, 1, 100);
-        const light_position = vec4(0, 5, 5, 1);
-        program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
-    }
-}
-
-export class Assignment2 extends Base_Scene {
-    /**
-     * This Scene object can be added to any display canvas.
-     * We isolate that code so it can be experimented with on its own.
-     * This gives you a very small code sandbox for editing a simple scene, and for
-     * experimenting with matrix transformations.
-     */
-    constructor(){
-        super();
-        // this.is_still = false;
-        // this.is_outline = false;
-        // this.is_odd = true;
-        // this.totalobj = 0;
-        // // this.set_colors()
-
         this.grid = this.initGrid();
         this.addNext = true;
 
         this.falling = {r:0,c:9,pos:this.shape_t.ZShape,color_i:0}
 
         this.over = false;
+        this.init_ok = false;
+        this.light_src = new Material(new Phong_Shader(), {
+            color: color(1, 1, 1, 1), ambient: 1, diffusivity: 0, specularity: 0
+        });
     }
 
     random_color() {
         return Math.floor(4 * Math.random());
     }
 
+
+    texture_buffer_init(gl) {
+        // Depth Texture
+        this.lightDepthTexture = gl.createTexture();
+        // Bind it to TinyGraphics
+        this.light_depth_texture = new Buffered_Texture(this.lightDepthTexture);
+        //this.stars.light_depth_texture = this.light_depth_texture
+        this.materials.floor.light_depth_texture = this.light_depth_texture
+
+        this.lightDepthTextureSize = LIGHT_DEPTH_TEX_SIZE;
+        gl.bindTexture(gl.TEXTURE_2D, this.lightDepthTexture);
+        gl.texImage2D(
+            gl.TEXTURE_2D,      // target
+            0,                  // mip level
+            gl.DEPTH_COMPONENT, // internal format
+            this.lightDepthTextureSize,   // width
+            this.lightDepthTextureSize,   // height
+            0,                  // border
+            gl.DEPTH_COMPONENT, // format
+            gl.UNSIGNED_INT,    // type
+            null);              // data
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        // Depth Texture Buffer
+        this.lightDepthFramebuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,       // target
+            gl.DEPTH_ATTACHMENT,  // attachment point
+            gl.TEXTURE_2D,        // texture target
+            this.lightDepthTexture,         // texture
+            0);                   // mip level
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        // create a color texture of the same size as the depth texture
+        // see article why this is needed_
+        this.unusedTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, this.unusedTexture);
+        gl.texImage2D(
+            gl.TEXTURE_2D,
+            0,
+            gl.RGBA,
+            this.lightDepthTextureSize,
+            this.lightDepthTextureSize,
+            0,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
+            null,
+        );
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        // attach it to the framebuffer
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,        // target
+            gl.COLOR_ATTACHMENT0,  // attachment point
+            gl.TEXTURE_2D,         // texture target
+            this.unusedTexture,         // texture
+            0);                    // mip level
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
     get_color(index) {
         let color;
         if (index === 0){
@@ -312,7 +383,7 @@ export class Assignment2 extends Base_Scene {
         this.falling.c = 9
     }
 
-    draw_frame(context, program_state){
+    draw_frame(context, program_state,shadow_pass){
         for (let i = 0; i < nCols; i++){
             for (let j = 0; j < nRows; j++){
                 if ( this.grid[i][j] === BORDER ){
@@ -325,44 +396,51 @@ export class Assignment2 extends Base_Scene {
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     let color = this.get_color(this.grid[i][j]);
-                    this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: color}));
+                    this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color}):this.materials.pure);
                     this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
                 }
 
             }
         }
-        let base = Mat4.identity().times(Mat4.translation(-15,-11,0)).times(Mat4.scale(1,0.01,1)); // the flattened base
-        for(let z = -10; z <= 11; z++){
-            for(let x = -4; x <= 19; x++){
-                this.shapes.base.draw(context, program_state, base.times(Mat4.translation(2*x-1,0,2*z-1)), this.materials.white, "LINES");
-            }
-        }
+       // let base = Mat4.identity().times(Mat4.translation(-15,-11,0)).times(Mat4.scale(70,70,1)); // the flattened base
+        // for(let z = -10; z <= 11; z++){
+        //     for(let x = -4; x <= 19; x++){
+        //         this.shapes.base.draw(context, program_state, base.times(Mat4.translation(2*x-1,0,2*z-1)), this.materials.white, "LINES");
+        //     }
+        // }
+
+        //ground for shadowing
+        let model_trans_floor = Mat4.translation(-6,-12,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(40, 40, 0.01));
+        
+        this.shapes.cube.draw(context, program_state, model_trans_floor,
+            shadow_pass?this.materials.floor_2:this.materials.pure);
+       
     }
 
     draw_background(context, program_state){
         // ground:
-        this.shapes.square.draw(context, program_state, Mat4.translation(0, -50, 0)
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 1)),
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, -50, 0)
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
             this.materials.ground);
         //back
-        this.shapes.square.draw(context, program_state, Mat4.translation(0, 0, -70)
-                .times(Mat4.scale(70, 70, 1)),
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, -70)
+                .times(Mat4.scale(70, 70, 0.01)),
             this.materials.ground);
         //front
-        this.shapes.square.draw(context, program_state, Mat4.translation(0, 0, 70)
-                .times(Mat4.scale(70, 70, 1)),
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, 70)
+                .times(Mat4.scale(70, 70, 0.01)),
             this.materials.ground);
         //up
-        this.shapes.square.draw(context, program_state, Mat4.translation(0, 70, 0)
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 1)),
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 70, 0)
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
             this.materials.ground);
         //left
-        this.shapes.square.draw(context, program_state, Mat4.translation(-70, 0, 0)
-                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 1)),
+        this.shapes.cube.draw(context, program_state, Mat4.translation(-70, 0, 0)
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 0.01)),
             this.materials.ground);
         //right
-        this.shapes.square.draw(context, program_state, Mat4.translation(70, 0, 0)
-                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 1)),
+        this.shapes.cube.draw(context, program_state, Mat4.translation(70, 0, 0)
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 0.01)),
             this.materials.ground);
     }
 
@@ -406,14 +484,15 @@ export class Assignment2 extends Base_Scene {
         }
     }
 
-    draw_falling_shape(context, program_state,shape){
+    draw_falling_shape(context, program_state,shape,shadow_pass){
 
         for (let arr of shape.pos){
             let x = shape.c + arr[0] - .5 * nRows;
             let y = 15 - (shape.r + arr[1]) - 1;
             let model_transform = Mat4.translation(x*2, y*2, 0);
             let shape_color = this.get_color(shape.color_i)
-            this.shapes.cube.draw(context, program_state, model_transform, this.materials.plastic.override({color: shape_color}));
+            //console.log(shadow_pass)
+            this.shapes.cube.draw(context, program_state, model_transform, shadow_pass ? this.materials.floor.override({color: shape_color}):this.materials.pure);
             this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
         }
 
@@ -461,34 +540,20 @@ export class Assignment2 extends Base_Scene {
         }
     }
 
-    display(context, program_state) {
-        super.display(context, program_state);
+    //game logic
+    render_scene(context, program_state, shadow_pass, draw_light_source=false, draw_shadow=false) {
+        let light_position = this.light_position;
+        let light_color = this.light_color;
+        //const t = program_state.animation_time;
 
-        if(this.attached !== undefined) {
-            let desired = this.attached();
-            if(desired === "origin"){
-                desired = Mat4.translation(0, -5, -65);
-            }
-            desired = desired.map((x,i) => Vector.from( program_state.camera_inverse[i]).mix(x, 0.1));
-            program_state.set_camera(desired);
+        program_state.draw_shadow = draw_shadow;
+
+        if (draw_light_source && shadow_pass) {
+            this.shapes.sphere.draw(context, program_state,
+                Mat4.translation(light_position[0], light_position[1], light_position[2]).times(Mat4.scale(.5,.5,.5)),
+                this.light_src.override({color: light_color}));
         }
-
-        // score display, according to the template in text-demo.js
-        let score = "Score: 888";
-        this.shapes.text.set_string(score, context.context);
-        this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.materials.text_image);
-
-
-        if (!context.scratchpad.controls) {
-            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-            this.children.push(new defs.Program_State_Viewer());
-            program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
-        }
-        //program_state.set_camera(Mat4.translation(0, 0, -50));
-        program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
-        program_state.lights = [new Light(vec4(0, -5, -10, 1), color(1, 1, 1, 1), 100000)];
-
-        this.draw_frame(context, program_state);
+        this.draw_frame(context, program_state,shadow_pass);
         this.draw_background(context, program_state);
 
         if ( !this.over ){
@@ -514,8 +579,81 @@ export class Assignment2 extends Base_Scene {
                 }
                 counter = t+1
             }
-            this.draw_falling_shape(context, program_state,this.falling)
+            this.draw_falling_shape(context, program_state,this.falling,shadow_pass)
         }  
+
+       
+    }
+
+
+    display(context, program_state) {
+        //super.display(context, program_state);
+        const t = program_state.animation_time;
+        const gl = context.context;
+
+        if (!this.init_ok) {
+            const ext = gl.getExtension('WEBGL_depth_texture');
+            if (!ext) {
+                return alert('need WEBGL_depth_texture');  // eslint-disable-line
+            }
+            this.texture_buffer_init(gl);
+
+            this.init_ok = true;
+        }
+       
+
+        // // score display, according to the template in text-demo.js
+        // let score = "Score: 888";
+        // this.shapes.text.set_string(score, context.context);
+        // this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.materials.text_image);
+
+
+        if (!context.scratchpad.controls) {
+            this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
+            this.children.push(new defs.Program_State_Viewer());
+            program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
+        }
+        //program_state.set_camera(Mat4.translation(0, 0, -50));
+        //program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
+        //program_state.lights = [new Light(vec4(0, -5, -10, 1), color(1, 1, 1, 1), 100000)];
+        this.light_position = Mat4.identity().times(vec4(2, 34, 0, 1));
+        this.light_color = color(1,1,1,1);
+        
+
+        // This is a rough target of the light.
+        // Although the light is point light, we need a target to set the POV of the light
+        this.light_view_target = vec4(0, 0, 0, 1);
+        this.light_field_of_view = 130 * Math.PI / 180; // 130 degree
+
+        program_state.lights = [new Light(this.light_position, this.light_color, 1000)];
+
+        // Step 1: set the perspective and camera to the POV of light
+        const light_view_mat = Mat4.look_at(
+            vec3(this.light_position[0], this.light_position[1], this.light_position[2]),
+            vec3(this.light_view_target[0], this.light_view_target[1], this.light_view_target[2]),
+        vec3(0, 1, 0), // assume the light to target will have a up dir of +y, maybe need to change according to your case
+        );
+        const light_proj_mat = Mat4.perspective(this.light_field_of_view, 1, 0.5, 500);
+        // Bind the Depth Texture Buffer
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.lightDepthFramebuffer);
+        gl.viewport(0, 0, this.lightDepthTextureSize, this.lightDepthTextureSize);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        // Prepare uniforms
+        program_state.light_view_mat = light_view_mat;
+        program_state.light_proj_mat = light_proj_mat;
+        program_state.light_tex_mat = light_proj_mat;
+        program_state.view_mat = light_view_mat;
+        program_state.projection_transform = light_proj_mat;
+        this.render_scene(context, program_state, false,false, false);
+
+        // Step 2: unbind, draw to the canvas
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+        program_state.view_mat = program_state.camera_inverse;
+        program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 0.5, 500);
+        this.render_scene(context, program_state, true,true, true);
+       
 
     }
 }
+
