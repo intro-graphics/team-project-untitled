@@ -605,9 +605,14 @@ export class Assignment2 extends Scene {
 
             this.init_ok = true;
         }
-       
 
-       
+        if(this.attached !== undefined) {
+            let desired = this.attached();
+            if(desired === "origin"){
+                program_state.set_camera( Mat4.translation(0, -5, -65));
+                this.attached = undefined;
+            }
+        }
 
 
         if (!context.scratchpad.controls) {
