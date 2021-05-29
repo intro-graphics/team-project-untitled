@@ -222,7 +222,8 @@ export class Assignment2 extends Scene {
         this.light_depth_texture = new Buffered_Texture(this.lightDepthTexture);
         //this.stars.light_depth_texture = this.light_depth_texture
         this.materials.floor.light_depth_texture = this.light_depth_texture
-
+        this.materials.floor_2.light_depth_texture = this.light_depth_texture
+        this.materials.ground.light_depth_texture = this.light_depth_texture
         this.lightDepthTextureSize = LIGHT_DEPTH_TEX_SIZE;
         gl.bindTexture(gl.TEXTURE_2D, this.lightDepthTexture);
         gl.texImage2D(
@@ -417,31 +418,31 @@ export class Assignment2 extends Scene {
        
     }
 
-    draw_background(context, program_state){
+    draw_background(context, program_state,shadow_pass){
         // ground:
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, -50, 0)
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
-            this.materials.ground);
+            shadow_pass? this.materials.ground:this.materials.pure);
         //back
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, -70)
                 .times(Mat4.scale(70, 70, 0.01)),
-            this.materials.ground);
+                shadow_pass? this.materials.ground:this.materials.pure);
         //front
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, 70)
                 .times(Mat4.scale(70, 70, 0.01)),
-            this.materials.ground);
+                shadow_pass? this.materials.ground:this.materials.pure);
         //up
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 70, 0)
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
-            this.materials.ground);
+                shadow_pass? this.materials.ground:this.materials.pure);
         //left
         this.shapes.cube.draw(context, program_state, Mat4.translation(-70, 0, 0)
                 .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 0.01)),
-            this.materials.ground);
+                shadow_pass? this.materials.ground:this.materials.pure);
         //right
         this.shapes.cube.draw(context, program_state, Mat4.translation(70, 0, 0)
                 .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 0.01)),
-            this.materials.ground);
+                shadow_pass? this.materials.ground:this.materials.pure);
     }
 
     canMove(dir){
@@ -547,14 +548,18 @@ export class Assignment2 extends Scene {
         //const t = program_state.animation_time;
 
         program_state.draw_shadow = draw_shadow;
-
+        // score display, according to the template in text-demo.js
+        let score = "Score: 888";
+        this.shapes.text.set_string(score, context.context);
+        this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.materials.text_image);
+        
         if (draw_light_source && shadow_pass) {
             this.shapes.sphere.draw(context, program_state,
                 Mat4.translation(light_position[0], light_position[1], light_position[2]).times(Mat4.scale(.5,.5,.5)),
                 this.light_src.override({color: light_color}));
         }
         this.draw_frame(context, program_state,shadow_pass);
-        this.draw_background(context, program_state);
+        this.draw_background(context, program_state,shadow_pass);
 
         if ( !this.over ){
             if ( this.addNext){
@@ -602,10 +607,7 @@ export class Assignment2 extends Scene {
         }
        
 
-        // // score display, according to the template in text-demo.js
-        // let score = "Score: 888";
-        // this.shapes.text.set_string(score, context.context);
-        // this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.materials.text_image);
+       
 
 
         if (!context.scratchpad.controls) {
@@ -653,6 +655,7 @@ export class Assignment2 extends Scene {
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 0.5, 500);
         this.render_scene(context, program_state, true,true, true);
        
+
 
     }
 }
