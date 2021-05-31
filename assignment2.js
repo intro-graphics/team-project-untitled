@@ -132,6 +132,15 @@ export class Assignment2 extends Scene {
      */
     constructor(){
         super();
+
+        // for physics simulation of cube falling after pressing down button
+        this.recordStartTime = false;
+        this.accelerate = false;
+        this.acc = 1;
+        this.startTime = 0;
+
+        // scoring
+        this.score = 0;
        
         this.shapes = {
             'cube': new Cube(),
@@ -374,8 +383,36 @@ export class Assignment2 extends Scene {
                 this.move([1,0]);
         });
         this.key_triggered_button("down", ["ArrowDown"], () => {
-            if(this.canMove([0,1]))
-                this.move([0,1]);
+            this.accelerate = true;
+            this.recordStartTime = true;
+            // let t = 1;
+            // let acc = 1;
+            // let indi = true;
+            // while (indi){
+            //     var i = 0;
+            //     while (i < t*acc){
+            //         if (this.canMove([0,1])){
+            //             this.move([0,1]);
+            //             i += 1;
+            //         } else {
+            //             break;
+            //         }
+            //     }
+            //     t += 1;
+            //     if (i < t*acc){
+            //         indi = false;
+            //     }
+            // }
+            // let t = 1;
+            // let acc = 1;
+            // while (this.canMove([0, t*acc])){
+            //     this.move([0, t*acc]);
+            //     t += 1;
+            // }
+            // while (this.canMove([0, 1])){
+            //     this.move([0, 1]);
+            // }
+                
         });
     }
 
@@ -385,6 +422,8 @@ export class Assignment2 extends Scene {
     }
 
     draw_frame(context, program_state,shadow_pass){
+        // let model_transform = Mat4.translation(0, )
+        // this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: hex_color("#ff0000")}):this.materials.pure)
         for (let i = 0; i < nCols; i++){
             for (let j = 0; j < nRows; j++){
                 if ( this.grid[i][j] === BORDER ){
@@ -392,11 +431,22 @@ export class Assignment2 extends Scene {
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
+                    if (i == 0){
+                        this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: hex_color("#ff0000")}):this.materials.pure);
+                    }
+                    for (var k = 1; k < 19; k++){
+                        if (this.grid[i][k] !== EMPTY && this.grid[i][k] !== BORDER){
+                            console.log(i/19.0);
+                            this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color((19 - i)/19.0, i/19.0, 0, 1)}):this.materials.pure);
+                        }
+                    }
                 } else if ( this.grid[i][j] !== EMPTY ){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     let color = this.get_color(this.grid[i][j]);
+                    if (this.over)
+                        color = hex_color("#808080");
                     this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color}):this.materials.pure);
                     this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
                 }
@@ -449,6 +499,8 @@ export class Assignment2 extends Scene {
         for (let arr of this.falling.pos){
             let newCol = this.falling.c + arr[0] + dir[0];
             let newRow = this.falling.r + arr[1] + dir[1];
+            if (newCol >= 19 || newRow >= 19)
+                return false;
             if (this.grid[newRow][newCol] !== EMPTY){
                 return false
             }
@@ -491,6 +543,7 @@ export class Assignment2 extends Scene {
             let x = shape.c + arr[0] - .5 * nRows;
             let y = 15 - (shape.r + arr[1]) - 1;
             let model_transform = Mat4.translation(x*2, y*2, 0);
+
             let shape_color = this.get_color(shape.color_i)
             //console.log(shadow_pass)
             this.shapes.cube.draw(context, program_state, model_transform, shadow_pass ? this.materials.floor.override({color: shape_color}):this.materials.pure);
@@ -528,6 +581,7 @@ export class Assignment2 extends Scene {
                     this.grid[0][j] = EMPTY;
                 }
                 row = row + 1; // reduce the number of checked row
+                this.score += 100;
             }
         }
     }
@@ -549,12 +603,15 @@ export class Assignment2 extends Scene {
 
         program_state.draw_shadow = draw_shadow;
         // score display, according to the template in text-demo.js
-        let score = "Score: 888";
+        let score = "Score: ";
+        let scoreStr = this.score.toString();
+        console.log(scoreStr);
+        score = score.concat(scoreStr);
         this.shapes.text.set_string(score, context.context);
         this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.materials.text_image);
         
         if (draw_light_source && shadow_pass) {
-            this.shapes.sphere.draw(context, program_state,
+            this.shapes.cube.draw(context, program_state,
                 Mat4.translation(light_position[0], light_position[1], light_position[2]).times(Mat4.scale(.5,.5,.5)),
                 this.light_src.override({color: light_color}));
         }
@@ -573,21 +630,36 @@ export class Assignment2 extends Scene {
 
 
             let t = program_state.animation_time / 1000
+            
             if(t>counter){
-                if(this.canMove([0,1])){
-                    this.move([0,1]);
+                if (this.recordStartTime){
+                    this.startTime = t;
+                    this.recordStartTime = false;
                 }
-                else{
+                if (this.canMove([0, 1])){
+                    if (this.accelerate){
+                        for (let i = 0; i < (t-this.startTime)*this.acc; i++){
+                            if (this.canMove([0, 1])){
+                                this.move([0, 1]);
+                            }
+                        }
+                    }
+                    else {
+                        this.move([0, 1]); 
+                    }   
+                } else {
                     this.addShapeToGrid();
                     this.eliminateRows();
                     this.check_continue();
+                    this.accelerate = false;
+                    this.score += 5;
                 }
-                counter = t+1
+                
+                counter = t+0.5;
             }
-            this.draw_falling_shape(context, program_state,this.falling,shadow_pass)
+            
         }  
-
-       
+        this.draw_falling_shape(context, program_state,this.falling,shadow_pass);
     }
 
 
