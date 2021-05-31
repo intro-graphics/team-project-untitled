@@ -18,15 +18,7 @@ const {
 const {Cube, Axis_Arrows, Textured_Phong, Phong_Shader, Basic_Shader, Subdivision_Sphere} = defs
 
 
-export class Text_Line extends Shape {                           // **Text_Line** embeds text in the 3D world, using a crude texture
-                                                                 // method.  This Shape is made of a horizontal arrangement of quads.
-                                                                 // Each is textured over with images of ASCII characters, spelling
-                                                                 // out a string.  Usage:  Instantiate the Shape with the desired
-                                                                 // character line width.  Then assign it a single-line string by calling
-                                                                 // set_string("your string") on it. Draw the shape on a material
-                                                                 // with full ambient weight, and text.png assigned as its texture
-                                                                 // file.  For multi-line strings, repeat this process and draw with
-                                                                 // a different matrix.
+export class Text_Line extends Shape {
     constructor(max_size) {
         super("position", "normal", "texture_coord");
         this.max_size = max_size;
@@ -141,6 +133,7 @@ export class Assignment2 extends Scene {
 
         // scoring
         this.score = 0;
+        this.maxScore = 0;
        
         this.shapes = {
             'cube': new Cube(),
@@ -289,6 +282,7 @@ export class Assignment2 extends Scene {
             0);                    // mip level
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
+
     get_color(index) {
         let color;
         if (index === 0){
@@ -454,7 +448,7 @@ export class Assignment2 extends Scene {
                     }
                     for (var k = 1; k < 19; k++){
                         if (this.grid[i][k] !== EMPTY && this.grid[i][k] !== BORDER){
-                            console.log(i/19.0);
+                            // console.log(i/19.0);
                             this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color((19 - i)/19.0, i/19.0, 0, 1)}):this.materials.pure);
                         }
                     }
@@ -609,6 +603,7 @@ export class Assignment2 extends Scene {
         for (let i = 1; i < 19; i++){
             if (this.grid[1][i] !== EMPTY){
                 this.over = true;
+                this.maxScore = this.score < this.maxScore ? this.maxScore : this.score ;
             }
         }
     }
@@ -623,11 +618,15 @@ export class Assignment2 extends Scene {
         // score display, according to the template in text-demo.js
         let score = "Score: ";
         let scoreStr = this.score.toString();
-        console.log(scoreStr);
         score = score.concat(scoreStr);
         this.shapes.text.set_string(score, context.context);
         this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 25, 0)), this.materials.text_image);
-        
+        let max_score = "Max Score: ";
+        let maxScoreStr = this.maxScore.toString();
+        max_score = max_score.concat(maxScoreStr);
+        this.shapes.text.set_string(max_score, context.context);
+        this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 20, 0)), this.materials.text_image);
+
         if (draw_light_source && shadow_pass) {
             this.shapes.cube.draw(context, program_state,
                 Mat4.translation(light_position[0], light_position[1], light_position[2]).times(Mat4.scale(.5,.5,.5)),
@@ -666,11 +665,11 @@ export class Assignment2 extends Scene {
                         this.move([0, 1]); 
                     }   
                 } else {
+                    this.score += 5;
                     this.addShapeToGrid();
                     this.eliminateRows();
                     this.check_continue();
                     this.accelerate = false;
-                    this.score += 5;
                 }
                 
                 counter = t+0.5;
