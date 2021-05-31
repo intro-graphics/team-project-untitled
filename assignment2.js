@@ -369,6 +369,24 @@ export class Assignment2 extends Scene {
 
     make_control_panel() {
         this.key_triggered_button("Default View", ["v"], () => this.attached = () => "origin");
+        this.new_line();
+        this.key_triggered_button("Restart", ["r"], () => {
+            this.grid = this.initGrid();
+            this.over = false;
+            this.addNext = true;
+            this.falling = {r:0,c:9,pos:this.shape_t.ZShape,color_i:0}
+            this.over = false;
+            this.init_ok = false;
+            this.recordStartTime = false;
+            this.accelerate = false;
+            this.acc = 1;
+            this.startTime = 0;
+
+            // scoring
+            this.score = 0;
+            // this.attached = "origin";
+
+        })
         this.key_triggered_button("Rotate", ["ArrowUp"], () => {
             if(this.canRotate())
                 this.rotate(this.falling);
