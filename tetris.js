@@ -477,7 +477,7 @@ export class Tetris extends Scene {
             let y = 15 - (shape.r + arr[1]) - 1;
             let model_transform = Mat4.translation(x*2, y*2, 0);
 
-            let shape_color = this.get_color(shape.color_i)
+            let shape_color = this.over ? hex_color("#808080") : this.get_color(shape.color_i)
             //console.log(shadow_pass)
             this.shapes.cube.draw(context, program_state, model_transform, shadow_pass ? this.materials.floor.override({color: shape_color}):this.materials.pure);
             this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
