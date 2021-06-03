@@ -3,11 +3,11 @@ This is the Github repository for UCLA CS174A Spring 2021 team project Tetris.
 
 Table of contents
   * [Introduction](#Introduction)
-  * [Group members](#Group%members)
+  * [Group members](#Group-members)
   * [Demo](#Demo)
-  * [Install and Usage](#Install%and%Usage)
-  * [User's guide](#User's%guide)
-  * [Advance features and solutions](#Advance%features%and%solutions)
+  * [Install and Usage](#Install-and-usage)
+  * [Player's guide](#Player's-guide)
+  * [Advance features and solutions](#Advance-features-and-solutions)
 
 
 ## Introduction
@@ -18,17 +18,17 @@ Jingchen Tang & Siyu Qian & Wenjie Mo & Zihao Dong
 
 ## Demo
 
-## Install and Usage
+## Install%and%Usage
 In a terminal window, run the following commands:
 
 ```shell
-Chmod 777 host.bash
+Chmod 777 host.bat
 ./host.bash
 ```
 
 Then open the browser and type `localhost:8000` in the address line to open this project
 
-## User's guide
+## Player's guide
 ### Game play
 - The game will immediately start when the user enter `localhost:8000`
 - The movemont of blocks could be controlled by arrow keys
