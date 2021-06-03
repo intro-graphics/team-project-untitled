@@ -38,20 +38,6 @@ class Cube_Outline extends Shape {
     }
 }
 
-class Cube_Single_Strip extends Shape {
-    constructor() {
-        super("position", "normal");
-        // TODO (Requirement 6)
-        this.arrays.position = Vector3.cast(
-            [-1,-1,1],[1,-1,1],[1,-1,-1],[-1,-1,-1],[-1,1,-1],[-1,1,1],[1,1,1],[1,1,-1]
-        );
-        this.arrays.normal = this.arrays.position;
-        this.indices = [0,1,3,2,4,7,5,6,0,1,6,2,7,4,3,5,0]
-
-    }
-}
-
-
 export class Tetris extends Scene {
     /**
      * This Scene object can be added to any display canvas.
@@ -83,8 +69,6 @@ export class Tetris extends Scene {
             'cube': new Cube(),
             "sphere": new Subdivision_Sphere(6),
             'outline': new Cube_Outline(color(1,1,1,1)),
-            'base' : new Cube_Outline(color(0.6,0.6,0.6,1)),
-            'strip': new Cube_Single_Strip(),
             'text': new Text_Line(35),
             'square': new defs.Square(),
         };
