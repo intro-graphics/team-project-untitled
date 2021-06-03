@@ -6,7 +6,7 @@ Table of contents
   * [Group members](#Group-members)
   * [Demo](#Demo)
   * [Install and Usage](#Install-and-Usage)
-  * [Player's guide](#Player's-guide)
+  * [Player guide](#Player-guide)
   * [Advance features and solutions](#Advance-features-and-solutions)
 
 
@@ -28,7 +28,7 @@ Chmod 777 host.bat
 
 Then open the browser and type `localhost:8000` in the address line to open this project
 
-## Player's guide
+## Player guide
 ### Game play
 - The game will immediately start when the user enter `localhost:8000`
 - The movemont of blocks could be controlled by arrow keys
