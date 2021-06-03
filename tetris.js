@@ -4,16 +4,15 @@ let nRows = 20;
 let nCols = 20;
 let EMPTY = -1;
 let BORDER = -2;
-let FILLED = 99;
 let counter = 0.0;
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4, Light, Shape, Material, Scene,Shader, Texture,
 } = tiny;
-const {Cube, Axis_Arrows, Textured_Phong, Phong_Shader, Basic_Shader, Subdivision_Sphere} = defs
+const {Cube, Textured_Phong, Phong_Shader, Basic_Shader, Subdivision_Sphere} = defs
 
 
-export class Text_Line extends Shape {
+class Text_Line extends Shape {
     constructor(max_size) {
         super("position", "normal", "texture_coord");
         this.max_size = max_size;
@@ -280,21 +279,8 @@ export class Tetris extends Scene {
         return color;
     }
 
-    new_T() // new object generator template (currently not in use)
-    {
-        let y = 1 + Math.floor((nCols - 4) * Math.random());
-        let x = 1;
-        let shape = this.shape_t;
-        // x y will be the bottom left corner of the generated T shape
-        let temp = this.random_color();
-        for ( var i = 0; i < 4; i++)
-        {
-            this.grid[shape.Square[i][0] + x][shape.Square[i][1] + y] = temp;
-        }
-    }
 
-    gene_new_obj()
-    {
+    gene_new_obj() {
         let num = 1 + Math.floor(7 * Math.random());
         let shape = this.shape_t;
         let next_shape;
@@ -402,34 +388,6 @@ export class Tetris extends Scene {
                 if(this.canMove([0,1]))
                     this.move([0,1]);
             }
-            // let t = 1;
-            // let acc = 1;
-            // let indi = true;
-            // while (indi){
-            //     var i = 0;
-            //     while (i < t*acc){
-            //         if (this.canMove([0,1])){
-            //             this.move([0,1]);
-            //             i += 1;
-            //         } else {
-            //             break;
-            //         }
-            //     }
-            //     t += 1;
-            //     if (i < t*acc){
-            //         indi = false;
-            //     }
-            // }
-            // let t = 1;
-            // let acc = 1;
-            // while (this.canMove([0, t*acc])){
-            //     this.move([0, t*acc]);
-            //     t += 1;
-            // }
-            // while (this.canMove([0, 1])){
-            //     this.move([0, 1]);
-            // }
-
         });
         this.key_triggered_button("Switch drop style", ["s"], () => {
             this.switch = !this.switch
@@ -469,24 +427,10 @@ export class Tetris extends Scene {
                         color = hex_color("#808080");
                     this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color}):this.materials.pure);
                     this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
-                } 
-//                 else if ( i == nCols - 1 && j % 3 == 0 ) {
-//                     let x = j - .5 * nRows;
-//                     let y = 15 - i - 1;
-//                     let model_transform = Mat4.translation(x*2+1, y*2, 0);
-//                     model_transform = model_transform.times(Mat4.scale(3, 1, 1));
-//                     this.shapes.cube.draw(context, program_state, model_transform, this.materials.stone);
-//                 }
+                }
 
             }
         }
-        // let base = Mat4.identity().times(Mat4.translation(-15,-11,0)).times(Mat4.scale(70,70,1)); // the flattened base
-        // for(let z = -10; z <= 11; z++){
-        //     for(let x = -4; x <= 19; x++){
-        //         this.shapes.base.draw(context, program_state, base.times(Mat4.translation(2*x-1,0,2*z-1)), this.materials.white, "LINES");
-        //     }
-        // }
-
         //ground for shadowing
         let model_trans_floor = Mat4.translation(-6,-12,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(40, 40, 0.01));
 
@@ -578,6 +522,7 @@ export class Tetris extends Scene {
         }
 
     }
+
     addShapeToGrid(){
 
         for (let arr of this.falling.pos){
@@ -726,9 +671,6 @@ export class Tetris extends Scene {
             this.children.push(new defs.Program_State_Viewer());
             program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
         }
-        //program_state.set_camera(Mat4.translation(0, 0, -50));
-        //program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
-        //program_state.lights = [new Light(vec4(0, -5, -10, 1), color(1, 1, 1, 1), 100000)];
         this.light_position = Mat4.identity().times(vec4(2, 60, 0, 1));
         this.light_color = color(1,1,1,1);
 
