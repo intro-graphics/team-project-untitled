@@ -5,7 +5,7 @@ Table of contents
   * [Introduction](#Introduction)
   * [Group members](#Group-members)
   * [Demo](#Demo)
-  * [Install and Usage](#Install-and-usage)
+  * [Install and Usage](#Install-and-Usage)
   * [Player's guide](#Player's-guide)
   * [Advance features and solutions](#Advance-features-and-solutions)
 
@@ -18,7 +18,7 @@ Jingchen Tang & Siyu Qian & Wenjie Mo & Zihao Dong
 
 ## Demo
 
-## Install%and%Usage
+## Install and Usage
 In a terminal window, run the following commands:
 
 ```shell
