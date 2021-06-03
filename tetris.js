@@ -125,8 +125,8 @@ export class Tetris extends Scene {
                 texture: new Texture("assets/marble2.jpeg")
             }),
             sea: new Material(new Shadow_Textured_Phong_Shader(1), {
-                diffusivity: 0.8, specularity: 0.8,
-                ambient: 0.7, color_texture: new Texture("./assets/sea.gif"),light_depth_texture: null
+                diffusivity: 1, specularity: 0.8,
+                ambient: 0.8, color_texture: new Texture("./assets/cartoon.png"),light_depth_texture: null
                 //
             }),
         };
