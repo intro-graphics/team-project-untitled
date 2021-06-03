@@ -77,6 +77,11 @@ export class Tetris extends Scene {
             'tinker':new Shape_From_File("assets/tinker.obj"),
             'starfish':new Shape_From_File("assets/StarFish.obj"),
             'turtle':new Shape_From_File("assets/turtle.obj"),
+            'small_fan_shell':new Shape_From_File("assets/SmallFanShell.obj"),
+            'big_fan_shell':new Shape_From_File("assets/SmallFanShell.obj"),
+            'sand_dollar':new Shape_From_File("assets/SandDollar.obj"),
+            'spiral_shell':new Shape_From_File("assets/SpiralShell.obj"),
+           
             
         };
 
@@ -97,6 +102,7 @@ export class Tetris extends Scene {
         this.materials = {
             plastic: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 1, specularity: 0.7, color: color(1,1,1,1)}),
+            
             floor : new Material(new Shadow_Textured_Phong_Shader(1), {
                 color: color(0.5, 1, 1, 1), ambient: 0.4, diffusivity: 0.6,
                 color_texture: null,
@@ -435,6 +441,14 @@ export class Tetris extends Scene {
         //turtle
         let model_turtle = Mat4.translation(6,-10,20).times(Mat4.rotation(Math.PI*(135/180), 0, 1, 0)).times(Mat4.scale(3, 3, 3));
         this.shapes.turtle.draw(context, program_state, model_turtle,shadow_pass?this.materials.floor:this.materials.pure);
+        //get from this.shapes
+        //small fan shell
+
+        //large fan shell
+
+        //spiral shell
+
+        //sand dollor
     }
 
     draw_background(context, program_state,shadow_pass){
