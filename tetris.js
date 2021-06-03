@@ -110,7 +110,11 @@ export class Tetris extends Scene {
                 color: hex_color('#000000'),
                 ambient: 0.7, color_texture: new Texture("./assets/stars.png"),light_depth_texture: null
             }),
-
+            sand: new Material(new Shadow_Textured_Phong_Shader(1), {
+                color: hex_color('#C2B280'),ambient: .4, diffusivity: 0.8, specularity: 0.8,
+                    color_texture: new Texture("assets/sand.jpg"),
+                    light_depth_texture: null
+                }),
             text_image : new Material(texture, {
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
@@ -119,6 +123,11 @@ export class Tetris extends Scene {
             stone: new Material(new Textured_Phong(),
                 {ambient: 0.8, diffusivity: 1, 
                 texture: new Texture("assets/marble2.jpeg")
+            }),
+            sea: new Material(new Shadow_Textured_Phong_Shader(1), {
+                diffusivity: 0.8, specularity: 0.8,
+                ambient: 0.7, color_texture: new Texture("./assets/sea.gif"),light_depth_texture: null
+                //
             }),
         };
 
@@ -380,38 +389,39 @@ export class Tetris extends Scene {
             }
         }
         //ground for shadowing
-        let model_trans_floor = Mat4.translation(-6,-12,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(40, 40, 0.01));
+        let model_trans_floor = Mat4.translation(0,-12,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01));
 
         this.shapes.cube.draw(context, program_state, model_trans_floor,
-            shadow_pass?this.materials.floor_2:this.materials.pure);
+            shadow_pass?this.materials.sand:this.materials.pure);
 
     }
 
     draw_background(context, program_state,shadow_pass){
         // ground:
-        this.shapes.cube.draw(context, program_state, Mat4.translation(0, -50, 0)
+        // this.shapes.cube.draw(context, program_state, Mat4.translation(0, -50, 0)
+        //         .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
+        //     shadow_pass? this.materials.ground:this.materials.pure);
+        
+        // //front
+        // this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, 70)
+        //         .times(Mat4.scale(70, 70, 0.01)),
+        //     shadow_pass? this.materials.ground:this.materials.pure);
+        //up
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 128, 0)
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
             shadow_pass? this.materials.ground:this.materials.pure);
         //back
-        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, -70)
-                .times(Mat4.scale(70, 70, 0.01)),
-            shadow_pass? this.materials.ground:this.materials.pure);
-        //front
-        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, 70)
-                .times(Mat4.scale(70, 70, 0.01)),
-            shadow_pass? this.materials.ground:this.materials.pure);
-        //up
-        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 70, 0)
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
-            shadow_pass? this.materials.ground:this.materials.pure);
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 28, -70)
+                .times(Mat4.scale(70, 40, 0.01)),
+            shadow_pass? this.materials.sea:this.materials.pure);
         //left
-        this.shapes.cube.draw(context, program_state, Mat4.translation(-70, 0, 0)
-                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 0.01)),
-            shadow_pass? this.materials.ground:this.materials.pure);
+        this.shapes.cube.draw(context, program_state, Mat4.translation(-70, 28, 0)
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 40, 0.01)),
+            shadow_pass? this.materials.sea:this.materials.pure);
         //right
-        this.shapes.cube.draw(context, program_state, Mat4.translation(70, 0, 0)
-                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 70, 0.01)),
-            shadow_pass? this.materials.ground:this.materials.pure);
+        this.shapes.cube.draw(context, program_state, Mat4.translation(70, 28, 0)
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 40, 0.01)),
+            shadow_pass? this.materials.sea:this.materials.pure);
     }
 
     canMove(dir){
