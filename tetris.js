@@ -74,7 +74,7 @@ export class Tetris extends Scene {
             'square': new defs.Square(),
             'sun': new defs.Subdivision_Sphere(4),
             'chair':new Shape_From_File("assets/chair.obj"),
-            
+            'umbrella': new Shape_From_File("assets/umbrella.obj")
         };
 
         this.shape_t =
@@ -136,6 +136,10 @@ export class Tetris extends Scene {
                 {ambient: 1, diffusivity: 1, specularity: 1,
                 texture: new Texture("assets/chair.jpg")
             }),
+            umbrella: new Material(new Textured_Phong(),
+                {ambient: 1, diffusivity: 1, specularity: 1,
+                    texture: new Texture("assets/umbrella_1.jpg")
+                }),
 
             sea: new Material(new Shadow_Textured_Phong_Shader(1), {
                 diffusivity: 1, specularity: 0.8,
@@ -414,7 +418,9 @@ export class Tetris extends Scene {
         let model_chair = Mat4.translation(40,-7.8,-10).times(Mat4.rotation(-Math.PI / 4, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
         this.shapes.chair.draw(context, program_state, model_chair,
             this.materials.chair);
-        
+        let model_umb = Mat4.translation(38,25,-10).times(Mat4.rotation(-Math.PI / 2, 1, 0, 0)).times(Mat4.scale(7, 7, 7));
+        this.shapes.umbrella.draw(context, program_state, model_umb,
+            this.materials.umbrella);
 
     }
 
@@ -478,7 +484,7 @@ export class Tetris extends Scene {
         this.falling.c += dir[0];
     }
 
-    rotate(s){
+    rotate(){
         if (this.falling.pos === this.shape_t.Square)
             return;
         for (let arr of this.falling.pos){
