@@ -192,6 +192,11 @@ export class Tetris extends Scene {
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
             }),
+
+            stone: new Material(new Textured_Phong(),
+                {ambient: 0.8, diffusivity: 1, 
+                texture: new Texture("assets/marble2.jpeg")
+            }),
         };
 
         this.textures = {
@@ -200,6 +205,7 @@ export class Tetris extends Scene {
             // grid: new Texture("assets/grid.png"),
             stars: new Texture("./assets/stars.png"),
             text: new Texture("./assets/text.png"),
+            stone: new Texture("./assets/stone.jpeg")
         }
         this.grid = this.initGrid();
         this.addNext = true;
@@ -453,7 +459,7 @@ export class Tetris extends Scene {
         // this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: hex_color("#ff0000")}):this.materials.pure)
         for (let i = 0; i < nCols; i++){
             for (let j = 0; j < nRows; j++){
-                if ( this.grid[i][j] === BORDER ){
+                if ( this.grid[i][j] === BORDER /* && i != nCols - 1 */){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
@@ -467,7 +473,7 @@ export class Tetris extends Scene {
                             this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color((19 - i)/19.0, i/19.0, 0, 1)}):this.materials.pure);
                         }
                     }
-                } else if ( this.grid[i][j] !== EMPTY ){
+                } else if ( this.grid[i][j] !== EMPTY && i != nCols - 1){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
@@ -476,7 +482,14 @@ export class Tetris extends Scene {
                         color = hex_color("#808080");
                     this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color}):this.materials.pure);
                     this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
-                }
+                } 
+//                 else if ( i == nCols - 1 && j % 3 == 0 ) {
+//                     let x = j - .5 * nRows;
+//                     let y = 15 - i - 1;
+//                     let model_transform = Mat4.translation(x*2+1, y*2, 0);
+//                     model_transform = model_transform.times(Mat4.scale(3, 1, 1));
+//                     this.shapes.cube.draw(context, program_state, model_transform, this.materials.stone);
+//                 }
 
             }
         }
