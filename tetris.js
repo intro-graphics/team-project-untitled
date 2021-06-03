@@ -1,5 +1,6 @@
 import {defs, tiny} from './examples/common.js';
 import {Color_Phong_Shader, Shadow_Textured_Phong_Shader,Buffered_Texture, LIGHT_DEPTH_TEX_SIZE} from './shadow-demo-shaders.js'
+import {Text_Line} from "./examples/text-demo.js";
 let nRows = 20;
 let nCols = 20;
 let EMPTY = -1;
@@ -10,43 +11,6 @@ const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4, Light, Shape, Material, Scene,Shader, Texture,
 } = tiny;
 const {Cube, Textured_Phong, Phong_Shader, Basic_Shader, Subdivision_Sphere} = defs
-
-
-class Text_Line extends Shape {
-    constructor(max_size) {
-        super("position", "normal", "texture_coord");
-        this.max_size = max_size;
-        var object_transform = Mat4.identity();
-        for (var i = 0; i < max_size; i++) {                                       // Each quad is a separate Square instance:
-            defs.Square.insert_transformed_copy_into(this, [], object_transform);
-            object_transform.post_multiply(Mat4.translation(1.5, 0, 0));
-        }
-    }
-
-    set_string(line, context) {           // set_string():  Call this to overwrite the texture coordinates buffer with new
-        // values per quad, which enclose each of the string's characters.
-        this.arrays.texture_coord = [];
-        for (var i = 0; i < this.max_size; i++) {
-            var row = Math.floor((i < line.length ? line.charCodeAt(i) : ' '.charCodeAt()) / 16),
-                col = Math.floor((i < line.length ? line.charCodeAt(i) : ' '.charCodeAt()) % 16);
-
-            var skip = 3, size = 32, sizefloor = size - skip;
-            var dim = size * 16,
-                left = (col * size + skip) / dim, top = (row * size + skip) / dim,
-                right = (col * size + sizefloor) / dim, bottom = (row * size + sizefloor + 5) / dim;
-
-            this.arrays.texture_coord.push(...Vector.cast([left, 1 - bottom], [right, 1 - bottom],
-                [left, 1 - top], [right, 1 - top]));
-        }
-        if (!this.existing) {
-            this.copy_onto_graphics_card(context);
-            this.existing = true;
-        } else
-            this.copy_onto_graphics_card(context, ["texture_coord"], false);
-    }
-}
-
-
 
 class Cube_Outline extends Shape {
     constructor(color) {
@@ -409,7 +373,7 @@ export class Tetris extends Scene {
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
                     this.shapes.outline.draw(context, program_state, model_transform, this.materials.white, "LINES");
-                    if (i == 0){
+                    if (i === 0){
                         this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: hex_color("#ff0000")}):this.materials.pure);
                     }
                     for (var k = 1; k < 19; k++){
@@ -418,7 +382,7 @@ export class Tetris extends Scene {
                             this.shapes.cube.draw(context, program_state, model_transform, shadow_pass?this.materials.floor.override({color: color((19 - i)/19.0, i/19.0, 0, 1)}):this.materials.pure);
                         }
                     }
-                } else if ( this.grid[i][j] !== EMPTY && i != nCols - 1){
+                } else if ( this.grid[i][j] !== EMPTY && i !== (nCols - 1)){
                     let x = j - .5 * nRows;
                     let y = 15 - i - 1;
                     let model_transform = Mat4.translation(x*2, y*2, 0);
