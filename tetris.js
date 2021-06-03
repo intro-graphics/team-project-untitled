@@ -71,6 +71,7 @@ export class Tetris extends Scene {
             'outline': new Cube_Outline(color(1,1,1,1)),
             'text': new Text_Line(35),
             'square': new defs.Square(),
+            'sun': new defs.Subdivision_Sphere(4),
         };
 
         this.shape_t =
@@ -89,7 +90,7 @@ export class Tetris extends Scene {
 
         this.materials = {
             plastic: new Material(new defs.Phong_Shader(),
-                {ambient: 0.8, diffusivity: 1, color: color(1,1,1,1)}),
+                {ambient: 1, diffusivity: 1, specularity: 0.7, color: color(1,1,1,1)}),
             floor : new Material(new Shadow_Textured_Phong_Shader(1), {
                 color: color(0.5, 1, 1, 1), ambient: 0.4, diffusivity: 0.6,
                 color_texture: null,
@@ -111,7 +112,7 @@ export class Tetris extends Scene {
                 ambient: 0.7, color_texture: new Texture("./assets/stars.png"),light_depth_texture: null
             }),
             sand: new Material(new Shadow_Textured_Phong_Shader(1), {
-                color: hex_color('#C2B280'),ambient: .4, diffusivity: 0.8, specularity: 0.8,
+                color: hex_color('#c2b280'),ambient: .4, diffusivity: 0.8, specularity: 0,
                     color_texture: new Texture("assets/sand.jpg"),
                     light_depth_texture: null
                 }),
@@ -129,6 +130,12 @@ export class Tetris extends Scene {
                 ambient: 0.8, color_texture: new Texture("./assets/cartoon.png"),light_depth_texture: null
                 //
             }),
+            sky: new Material(new Shadow_Textured_Phong_Shader(1), {
+                diffusivity: 1, specularity: 0.8,
+                ambient: 0.8, color_texture: new Texture("./assets/sky.jpg"),light_depth_texture: null
+            }),
+            sun: new Material(new defs.Phong_Shader(),
+                {ambient: 1, color: hex_color("#efebdc")}),
         };
 
         this.textures = {
@@ -146,9 +153,6 @@ export class Tetris extends Scene {
 
         this.over = false;
         this.init_ok = false;
-        this.light_src = new Material(new Phong_Shader(), {
-            color: color(1, 1, 1, 1), ambient: 1, diffusivity: 0, specularity: 0
-        });
     }
 
     random_color() {
@@ -407,9 +411,9 @@ export class Tetris extends Scene {
         //         .times(Mat4.scale(70, 70, 0.01)),
         //     shadow_pass? this.materials.ground:this.materials.pure);
         //up
-        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 128, 0)
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 68, 0)
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
-            shadow_pass? this.materials.ground:this.materials.pure);
+            shadow_pass? this.materials.sky:this.materials.pure);
         //back
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 28, -70)
                 .times(Mat4.scale(70, 40, 0.01)),
@@ -547,9 +551,9 @@ export class Tetris extends Scene {
         this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 20, 0)), this.materials.text_image);
 
         if (draw_light_source && shadow_pass) {
-            this.shapes.cube.draw(context, program_state,
-                Mat4.translation(light_position[0], light_position[1], light_position[2]).times(Mat4.scale(.5,.5,.5)),
-                this.light_src.override({color: light_color}));
+            this.shapes.sun.draw(context, program_state,
+                Mat4.translation(light_position[0], light_position[1], light_position[2]),
+                this.materials.sun);
         }
         this.draw_frame(context, program_state,shadow_pass);
         this.draw_background(context, program_state,shadow_pass);
@@ -629,7 +633,7 @@ export class Tetris extends Scene {
             this.children.push(new defs.Program_State_Viewer());
             program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
         }
-        this.light_position = Mat4.identity().times(vec4(2, 60, 0, 1));
+        this.light_position = Mat4.identity().times(vec4(-1, 40, 20, 1));
         this.light_color = color(1,1,1,1);
 
 
