@@ -7,11 +7,6 @@ let BORDER = -2;
 let FILLED = 99;
 let counter = 0.0;
 
-// BGM part, uncomment to have BGM upon opening
-// var audio = new Audio();
-// audio.src = "./assets/Tetris.mp3"
-// audio.autoplay = true;
-
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Matrix, Mat4, Light, Shape, Material, Scene,Shader, Texture,
 } = tiny;
@@ -94,27 +89,6 @@ class Cube_Single_Strip extends Shape {
 }
 
 
-// class Base_Scene extends Scene {
-//     /**
-//      *  **Base_scene** is a Scene that can be added to any display canvas.
-//      *  Setup the shapes, materials, camera, and lighting here.
-//      */
-//     constructor() {
-//         super();
-//         // this.hover = this.swarm = false;
-
-//         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
-
-//     }
-
-//     display(context, program_state) {
-//         program_state.projection_transform = Mat4.perspective(
-//             Math.PI / 4, context.width / context.height, 1, 100);
-//         const light_position = vec4(0,15,0, 1);
-//         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
-//     }
-// }
-
 export class Tetris extends Scene {
     /**
      * This Scene object can be added to any display canvas.
@@ -124,6 +98,12 @@ export class Tetris extends Scene {
      */
     constructor(){
         super();
+
+        // audio initialization
+        this.audio = new Audio();
+        this.mute_flag = false;
+        this.audio.src = "./assets/Tetris.mp3";
+        this.audio.autoplay = true;
 
         // for physics simulation of cube falling after pressing down button
         this.recordStartTime = false;
@@ -179,10 +159,6 @@ export class Tetris extends Scene {
             light_src : new Material(new Phong_Shader(), {
                 color: color(1, 1, 1, 1), ambient: 1, diffusivity: 0, specularity: 0
             }),
-            // ground: new Material(shader, {
-            //     color: hex_color('#000000'),
-            //     ambient: 0.7, texture: new Texture("./assets/stars.png")
-            // }),
             ground: new Material(new Shadow_Textured_Phong_Shader(1), {
                 color: hex_color('#000000'),
                 ambient: 0.7, color_texture: new Texture("./assets/stars.png"),light_depth_texture: null
@@ -372,7 +348,20 @@ export class Tetris extends Scene {
         this.key_triggered_button("Default View", ["v"], () => this.attached = () => "origin");
         this.new_line();
         this.key_triggered_button("Music Start/Mute", ["m"], () => {
+            // control the mute and start of game
+            if(this.mute_flag)
+            {
+                this.audio.pause();
+                this.mute_flag = !this.mute_flag;
+            }
+            else
+            {
 
+                this.audio.currentTime = 0;
+                this.audio.volume = 0.15;
+                this.audio.play();
+                this.mute_flag = !this.mute_flag;
+            }
         });
         this.new_line();
         this.key_triggered_button("Restart", ["r"], () => {
@@ -389,8 +378,6 @@ export class Tetris extends Scene {
 
             // scoring
             this.score = 0;
-            // this.attached = "origin";
-
         })
         this.key_triggered_button("Rotate", ["ArrowUp"], () => {
             if(this.canRotate())
@@ -779,7 +766,10 @@ export class Tetris extends Scene {
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 0.5, 500);
         this.render_scene(context, program_state, true,true, true);
 
-
+        if(this.audio.currentTime > 83.7)
+        {
+            this.audio.currentTime = 0; // reset the audio for loop playing
+        }
 
     }
 }
