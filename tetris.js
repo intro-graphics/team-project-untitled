@@ -1,6 +1,7 @@
 import {defs, tiny} from './examples/common.js';
 import {Color_Phong_Shader, Shadow_Textured_Phong_Shader,Buffered_Texture, LIGHT_DEPTH_TEX_SIZE} from './shadow-demo-shaders.js'
 import {Text_Line} from "./examples/text-demo.js";
+import {Shape_From_File} from './examples/obj-file-demo.js'
 let nRows = 20;
 let nCols = 20;
 let EMPTY = -1;
@@ -72,6 +73,8 @@ export class Tetris extends Scene {
             'text': new Text_Line(35),
             'square': new defs.Square(),
             'sun': new defs.Subdivision_Sphere(4),
+            'chair':new Shape_From_File("assets/chair.obj"),
+            
         };
 
         this.shape_t =
@@ -120,11 +123,20 @@ export class Tetris extends Scene {
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
             }),
-
+            // towel:new Material(new Textured_Phong(),
+            //     {ambient: 0.8, diffusivity: 0.3, specularity: 0.3,
+            //     texture: new Texture("assets/towel_pink.jpg")
+            // }),
+            //towel: await this.load_file('./assets/towel.mtl'),
             stone: new Material(new Textured_Phong(),
                 {ambient: 0.8, diffusivity: 1, 
                 texture: new Texture("assets/marble2.jpeg")
             }),
+            chair: new Material(new Textured_Phong(),
+                {ambient: 1, diffusivity: 1, specularity: 1,
+                texture: new Texture("assets/chair.jpg")
+            }),
+
             sea: new Material(new Shadow_Textured_Phong_Shader(1), {
                 diffusivity: 1, specularity: 0.8,
                 ambient: 0.8, color_texture: new Texture("./assets/cartoon.png"),light_depth_texture: null
@@ -137,7 +149,8 @@ export class Tetris extends Scene {
             sun: new Material(new defs.Phong_Shader(),
                 {ambient: 1, color: hex_color("#efebdc")}),
         };
-
+       
+    
         this.textures = {
             rgb: new Texture("./assets/rgb.jpg"),
             earth: new Texture("./assets/earth.gif"),
@@ -154,6 +167,7 @@ export class Tetris extends Scene {
         this.over = false;
         this.init_ok = false;
     }
+   
 
     random_color() {
         return Math.floor(4 * Math.random());
@@ -397,6 +411,10 @@ export class Tetris extends Scene {
 
         this.shapes.cube.draw(context, program_state, model_trans_floor,
             shadow_pass?this.materials.sand:this.materials.pure);
+        let model_chair = Mat4.translation(40,-7.8,-10).times(Mat4.rotation(-Math.PI / 4, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
+        this.shapes.chair.draw(context, program_state, model_chair,
+            this.materials.chair);
+        
 
     }
 
