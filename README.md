@@ -1,16 +1,28 @@
-# Tetris with tiny-graphics.js
+# Tetris implemented with tiny-graphics.js
 
-####This is the Github repository for UCLA CS174A team project Tetris.
+####This is the Github repository for UCLA CS174A Spring 2021 team project Tetris.
 
 ## **Group Members:**
 
 ##### Jingchen Tang & Siyu Qian & Wenjie Mo & Zihao Dong
 
-### **Introduction:**
+## **Introduction:**
 
-##### Everyone has played a basic version of Tetris. Our team wants to improve its graphics into a more modem and advanced scale. In Particular, we want to give light and shadow effects on each block and add more details on the blocks such as different textures, collision effects when two blocks touch. The goal of our project is to make a Tetris game with more advanced graphics effects.
+##### Everyone has played a basic version of Tetris. Our team wants to improve its graphics into a more moden and advanced scale. After a five week development, we have achieved  many features such as light and shadow effects on each block, more detailed textures on the blocks, and collision effects when two blocks touch. The goal of our project is to make a Tetris game with more advanced graphics effects.
 
-#**screenshots**
+##**Demo**
+
+##**Usage**
+##### In a terminal window, run the following commands:
+
+```shell
+Chmod 777 host.bash
+./host.bash
+```
+
+#####Then open the browser and type `localhost:8000` in the address line to open this project
+
+
 
 ##**Advance features and solutions**
 
