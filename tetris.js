@@ -128,6 +128,7 @@ export class Tetris extends Scene {
         // for physics simulation of cube falling after pressing down button
         this.recordStartTime = false;
         this.accelerate = false;
+        this.switch = false;
         this.acc = 1;
         this.startTime = 0;
 
@@ -364,6 +365,10 @@ export class Tetris extends Scene {
     make_control_panel() {
         this.key_triggered_button("Default View", ["v"], () => this.attached = () => "origin");
         this.new_line();
+        this.key_triggered_button("Music Start/Mute", ["m"], () => {
+
+        });
+        this.new_line();
         this.key_triggered_button("Restart", ["r"], () => {
             this.grid = this.initGrid();
             this.over = false;
@@ -395,8 +400,15 @@ export class Tetris extends Scene {
                 this.move([1,0]);
         });
         this.key_triggered_button("down", ["ArrowDown"], () => {
-            this.accelerate = true;
-            this.recordStartTime = true;
+            if(this.switch){
+                this.accelerate = true;
+                this.recordStartTime = true;
+            }
+            else
+            {
+                if(this.canMove([0,1]))
+                    this.move([0,1]);
+            }
             // let t = 1;
             // let acc = 1;
             // let indi = true;
@@ -425,6 +437,9 @@ export class Tetris extends Scene {
             //     this.move([0, 1]);
             // }
 
+        });
+        this.key_triggered_button("Switch drop style", ["s"], () => {
+            this.switch = !this.switch
         });
     }
 
@@ -594,6 +609,7 @@ export class Tetris extends Scene {
                 }
                 row = row + 1; // reduce the number of checked row
                 this.score += 100;
+                this.maxScore = this.score < this.maxScore ? this.maxScore : this.score
             }
         }
     }
@@ -666,6 +682,7 @@ export class Tetris extends Scene {
                     }
                 } else {
                     this.score += 5;
+                    this.maxScore = this.score < this.maxScore ? this.maxScore : this.score
                     this.addShapeToGrid();
                     this.eliminateRows();
                     this.check_continue();
@@ -712,7 +729,7 @@ export class Tetris extends Scene {
         //program_state.set_camera(Mat4.translation(0, 0, -50));
         //program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 1, 500);
         //program_state.lights = [new Light(vec4(0, -5, -10, 1), color(1, 1, 1, 1), 100000)];
-        this.light_position = Mat4.identity().times(vec4(2, 34, 0, 1));
+        this.light_position = Mat4.identity().times(vec4(2, 60, 0, 1));
         this.light_color = color(1,1,1,1);
 
 
