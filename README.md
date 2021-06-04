@@ -14,7 +14,7 @@ Table of contents
 Everyone has played a basic version of Tetris. Our team wants to improve its graphics into a more moden and advanced scale. After a five week development, we have achieved  many features such as light and shadow effects on each block, more detailed textures on the blocks, and collision effects when two blocks touch. Our project demo and feature explaination will be presnted below.
 
 ### Group members
-Jingchen Tang & Siyu Qian & Wenjie Mo & Zihao Dong
+Jingchen Tang, Siyu Qian, Wenjie Mo, Zihao Dong
 
 ## Demo
 #### Game play:  
@@ -34,6 +34,7 @@ Chmod 777 host.bat
 ```
 
 Then open the browser and type `localhost:8000` in the address line to open this project
+**Important notice: upon entering the localhost, if the screen is blank white, please hard reload the page** 
 
 ## Player guide
 ### Game play
@@ -68,6 +69,9 @@ Since the falling polygon needs to be placed above the existing polygons, we ach
 The downward acceleration of blocks when pressed down button will be based on the real world acceleration. Two kinds of different accelerations could be applied by pressing 'switch drop style' button in control panel. The effect of Physics-based simulation is presented below with a gif image.
 #### Acceleration of falling blocks
 <img src="https://github.com/intro-graphics/team-project-untitled/raw/master/assets/physics.gif" alt="gameplay" width="350"/>
+
+## Acknowledgement
+Thanks for Prof. Law, TA. Guo, and TA. Lu for helpng us during the project development!
 
 ## References
 [Softbody Tetris](www.youtube.com/watch?v=RfNlhw8FK74)  
