@@ -17,7 +17,10 @@ Everyone has played a basic version of Tetris. Our team wants to improve its gra
 Jingchen Tang & Siyu Qian & Wenjie Mo & Zihao Dong
 
 ## Demo
-
+### Game play
+![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/gameplay.png)
+### game over
+![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/gameover.png)
 ## Install and Usage
 In a terminal window, run the following commands:
 
