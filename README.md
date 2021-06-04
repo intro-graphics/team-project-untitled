@@ -33,7 +33,7 @@ Chmod 777 host.bat
 ./host.bash
 ```
 
-Then open the browser and type `localhost:8000` in the address line to open this project
+Then open the browser and type `localhost:8000` in the address line to open this project  
 **Important notice: upon entering the localhost, if the screen is blank white, please hard reload the page** 
 
 ## Player guide
