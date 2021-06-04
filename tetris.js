@@ -1,5 +1,5 @@
 import {defs, tiny} from './examples/common.js';
-import {Color_Phong_Shader, Shadow_Textured_Phong_Shader,Buffered_Texture, LIGHT_DEPTH_TEX_SIZE} from './shadow-demo-shaders.js'
+import {Color_Phong_Shader, Shadow_Textured_Phong_Shader,Buffered_Texture, LIGHT_DEPTH_TEX_SIZE, Texture_Scroll_X} from './shadow-demo-shaders.js'
 import {Text_Line} from "./examples/text-demo.js";
 import {Shape_From_File} from './examples/obj-file-demo.js'
 let nRows = 20;
@@ -113,6 +113,11 @@ export class Tetris extends Scene {
                 light_depth_texture: null
             }),
             white : new Material(new defs.Basic_Shader()),
+            scroll_tex:new Material(new Texture_Scroll_X(), {
+                color: hex_color("#000000"),
+                ambient: 0.8, diffusivity: 1, specularity: 0.8,
+                texture: new Texture("./assets/cartoon.png","LINEAR_MIPMAP_LINEAR")
+            }),
             pure : new Material(new Color_Phong_Shader(), {
             }),
             light_src : new Material(new Phong_Shader(), {
@@ -138,7 +143,7 @@ export class Tetris extends Scene {
                 texture: new Texture("assets/marble2.jpeg")
             }),
             chair: new Material(new Shadow_Textured_Phong_Shader(1),
-                {ambient: 1, diffusivity: 0.8, specularity: 1,
+                {ambient: 1, diffusivity: 1, specularity: 1,
                 color_texture: new Texture("assets/chair.jpg"),light_depth_texture: null
             }),
             umbrella: new Material(new Textured_Phong(),
@@ -172,11 +177,12 @@ export class Tetris extends Scene {
             text: new Texture("./assets/text.png"),
             stone: new Texture("./assets/stone.jpeg")
         }
+        this.show_light = false
         this.grid = this.initGrid();
         this.addNext = true;
 
         this.falling = {r:0,c:9,pos:this.shape_t.ZShape,color_i:0}
-
+        this.complete = false
         this.over = false;
         this.init_ok = false;
     }
@@ -380,6 +386,13 @@ export class Tetris extends Scene {
         this.key_triggered_button("Switch drop style", ["s"], () => {
             this.switch = !this.switch
         });
+        this.key_triggered_button("Show light source", ["w"], () => {
+            this.show_light = !this.show_light
+        });
+        this.key_triggered_button("See complete scene", ["e"], () => {
+            this.complete = !this.complete
+
+        });
     }
 
     resetFallingShape(){
@@ -460,31 +473,22 @@ export class Tetris extends Scene {
     }
 
     draw_background(context, program_state,shadow_pass){
-        // ground:
-        // this.shapes.cube.draw(context, program_state, Mat4.translation(0, -50, 0)
-        //         .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
-        //     shadow_pass? this.materials.ground:this.materials.pure);
         
-        // //front
-        // this.shapes.cube.draw(context, program_state, Mat4.translation(0, 0, 70)
-        //         .times(Mat4.scale(70, 70, 0.01)),
-        //     shadow_pass? this.materials.ground:this.materials.pure);
-        //up
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 68, 0)
-                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
+                .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 45, 0.01)),
             shadow_pass? this.materials.sky:this.materials.pure);
         //back
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 28, -45)
                 .times(Mat4.scale(70, 40, 0.01)),
-            shadow_pass? this.materials.sea:this.materials.pure);
+            shadow_pass? this.materials.scroll_tex:this.materials.pure);
         //left
         this.shapes.cube.draw(context, program_state, Mat4.translation(-70, 28, 0)
                 .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(45, 40, 0.01)),
-            shadow_pass? this.materials.sea:this.materials.pure);
+            shadow_pass? this.materials.scroll_tex:this.materials.pure);
         //right
         this.shapes.cube.draw(context, program_state, Mat4.translation(70, 28, 0)
                 .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(45, 40, 0.01)),
-            shadow_pass? this.materials.sea:this.materials.pure);
+            shadow_pass? this.materials.scroll_tex:this.materials.pure);
     }
 
     canMove(dir){
@@ -609,7 +613,7 @@ export class Tetris extends Scene {
         this.shapes.text.set_string(max_score, context.context);
         this.shapes.text.draw(context, program_state, Mat4.identity().times(Mat4.translation(23, 20, 0)), this.materials.text_image);
 
-        if (draw_light_source && shadow_pass) {
+        if (draw_light_source && shadow_pass && this.show_light) {
             this.shapes.sun.draw(context, program_state,
                 Mat4.translation(light_position[0], light_position[1], light_position[2]),
                 this.materials.sun);
@@ -730,11 +734,15 @@ export class Tetris extends Scene {
         program_state.view_mat = program_state.camera_inverse;
         program_state.projection_transform = Mat4.perspective(Math.PI / 4, context.width / context.height, 0.5, 500);
         this.render_scene(context, program_state, true,true, true);
-
+        if(this.complete){
+            program_state.set_camera( Mat4.translation(0, -15, -110));
+            this.complete = false
+        }
         if(this.audio.currentTime > 83.7)
         {
             this.audio.currentTime = 0; // reset the audio for loop playing
         }
+
 
     }
 }
