@@ -54,7 +54,9 @@ Then open the browser and type `localhost:8000` in the address line to open this
 The overall interface of the game has a 3D shape which also requires shading and illumination. There will be a shadowing effect on each falling block of Tereis. The shadows will appear at the ground as well as each block below the falling blocks, which enhances the reality aspect of the project. The details of shadowing effects are shown below.
 #### Shadowing effects when blocks are on the ground or on other blocks
 <img src="https://github.com/intro-graphics/team-project-untitled/raw/master/assets/stationary_shadow.png" alt="gameplay" width="256"/>
+
 #### Shadowing effects when blocks are falling
+
 <img src="https://github.com/intro-graphics/team-project-untitled/raw/master/assets/falling_shadow.jpeg" alt="gameplay" width="256"/>
 
 ### Collision Detection
