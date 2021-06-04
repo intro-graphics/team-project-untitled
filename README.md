@@ -11,10 +11,10 @@ Table of contents
 
 
 ## Introduction
-Everyone has played a basic version of Tetris. Our team wants to improve its graphics into a more moden and advanced scale. After a five week development, we have achieved  many features such as light and shadow effects on each block, more detailed textures on the blocks, and collision effects when two blocks touch. Our project demo and feature explaination will be presnted below.
+Everyone has played a basic version of Tetris. Our team wants to improve its graphics to a more modern and advanced scale. After a five-week development, we have achieved many features such as light and shadow effects on each block, more detailed textures on the blocks, and collision effects when two blocks touch. Our project demo and feature explanation will be presented below.
 
 ### Group members
-Jingchen Tang & Siyu Qian & Wenjie Mo & Zihao Dong
+Jingchen Tang, Siyu Qian, Wenjie Mo, Zihao Dong
 
 ## Demo
 #### Game play:  
@@ -33,25 +33,26 @@ Chmod 777 host.bat
 ./host.bash
 ```
 
-Then open the browser and type `localhost:8000` in the address line to open this project
+Then open the browser and type `localhost:8000` in the address line to open this project  
+**Important notice: upon entering the localhost, if the screen is blank white, please hard reload the page** 
 
 ## Player guide
 ### Game play
 - The first loading may take up to five seconds due to 3D model loading
-- The game will immediately start when the user enter `localhost:8000`
-- The movemont of blocks could be controlled by arrow keys
-  - Move left and right by pressing left and right arrow key
-  - Accelerate block dropping by pressing down arrow key
-  - Rotate block by pressing up arrow key
+- The game will immediately start when the user enter the `localhost:8000`
+- The movement of blocks could be controlled by arrow keys
+  - Move left and right by pressing the left and tge right arrow key
+  - Accelerate block dropping by pressing the down arrow key
+  - Rotate block by pressing the up arrow key
 - The basic elimination and gameover rules will follow the original Tetris
 ### Extra controls
 - The BGM could be turned on or turned off by clicking the Music start/mute button (music is muted by default)
 - To restart the game, the user could click the restart button or refresh the page
-- The field of view are free to be moved
+- The field of view is free to be moved
 
 ## Advance features and solutions
 ### Shadowing
-The overall interface of the game has a 3D shape which also requires shading and illumination. There will be a shadowing effect on each falling block of Tereis. The shadows will appear at the ground as well as each block below the falling blocks, which enhances the reality aspect of the project. The details of shadowing effects are shown below.
+The overall interface of the game has a 3D shape which also requires shading and illumination. There will be a shadowing effect on each falling block of Tereis. The shadows will appear on the ground as well as each block below the falling blocks, which enhances the reality aspect of the project. The details of shadowing effects are shown below.
 #### Shadowing effects when blocks are on the ground or on other blocks
 <img src="https://github.com/intro-graphics/team-project-untitled/raw/master/assets/stationary_shadow.png" alt="gameplay" width="256"/>
 
@@ -68,6 +69,9 @@ Since the falling polygon needs to be placed above the existing polygons, we ach
 The downward acceleration of blocks when pressed down button will be based on the real world acceleration. Two kinds of different accelerations could be applied by pressing 'switch drop style' button in control panel. The effect of Physics-based simulation is presented below with a gif image.
 #### Acceleration of falling blocks
 <img src="https://github.com/intro-graphics/team-project-untitled/raw/master/assets/physics.gif" alt="gameplay" width="350"/>
+
+## Acknowledgement
+Thanks for Prof. Law, TA. Guo, and TA. Lu for helping us during the project development!
 
 ## References
 [Softbody Tetris](www.youtube.com/watch?v=RfNlhw8FK74)  
