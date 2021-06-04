@@ -113,11 +113,7 @@ export class Tetris extends Scene {
                 light_depth_texture: null
             }),
             white : new Material(new defs.Basic_Shader()),
-            scroll_tex:new Material(new Texture_Scroll_X(), {
-                color: hex_color("#000000"),
-                ambient: 0.8, diffusivity: 1, specularity: 0.8,
-                texture: new Texture("./assets/cartoon.png","LINEAR_MIPMAP_LINEAR")
-            }),
+
             pure : new Material(new Color_Phong_Shader(), {
             }),
             light_src : new Material(new Phong_Shader(), {
@@ -158,7 +154,11 @@ export class Tetris extends Scene {
             sea: new Material(new Shadow_Textured_Phong_Shader(1), {
                 diffusivity: 1, specularity: 0.8,
                 ambient: 0.8, color_texture: new Texture("./assets/cartoon.png"),light_depth_texture: null
-                //
+            }),
+            scroll_tex:new Material(new Texture_Scroll_X(), {
+                color: hex_color("#000000"),
+                ambient: 0.8, diffusivity: 1, specularity: 0.8,
+                texture: new Texture("./assets/cartoon.png","LINEAR_MIPMAP_LINEAR")
             }),
             sky: new Material(new Shadow_Textured_Phong_Shader(1), {
                 diffusivity: 1, specularity: 0.8,
@@ -180,7 +180,7 @@ export class Tetris extends Scene {
         this.show_light = false
         this.grid = this.initGrid();
         this.addNext = true;
-
+        this.scroll = true;
         this.falling = {r:0,c:9,pos:this.shape_t.ZShape,color_i:0}
         this.complete = false
         this.over = false;
@@ -393,6 +393,10 @@ export class Tetris extends Scene {
             this.complete = !this.complete
 
         });
+        this.key_triggered_button("Scrolling ocean", ["x"], () => {
+            this.scroll = !this.scroll;
+
+        });
     }
 
     resetFallingShape(){
@@ -481,17 +485,21 @@ export class Tetris extends Scene {
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 45, 0.01)),
             shadow_pass? this.materials.sky:this.materials.pure);
         //back
+        let sea_material = this.materials.scroll_tex
+        if(!this.scroll){
+            sea_material = this.materials.sea;
+        }
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 28, -45)
                 .times(Mat4.scale(70, 40, 0.01)),
-            shadow_pass? this.materials.scroll_tex:this.materials.pure);
+            shadow_pass? sea_material:this.materials.pure);
         //left
         this.shapes.cube.draw(context, program_state, Mat4.translation(-70, 28, 0)
                 .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(45, 40, 0.01)),
-            shadow_pass? this.materials.scroll_tex:this.materials.pure);
+            shadow_pass? sea_material:this.materials.pure);
         //right
         this.shapes.cube.draw(context, program_state, Mat4.translation(70, 28, 0)
                 .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(45, 40, 0.01)),
-            shadow_pass? this.materials.scroll_tex:this.materials.pure);
+            shadow_pass? sea_material:this.materials.pure);
     }
 
     canMove(dir){
