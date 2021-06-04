@@ -467,7 +467,7 @@ export class Tetris extends Scene {
         this.shapes.spiral_shell.draw(context, program_state, model_sshell, shadow_pass?this.materials.floor.override({color: color(1,1,1,1)}):this.materials.pure);
         let model_sshell_2 = Mat4.translation(30,-10.5,25).times(Mat4.scale(1, 1, 1));
         this.shapes.spiral_shell.draw(context, program_state, model_sshell_2, shadow_pass?this.materials.floor.override({color: hex_color('#A15168')}):this.materials.pure);
-        let model_sshell_3 = Mat4.translation(-23,-10.5,40).times(Mat4.scale(1, 1, 1));
+        let model_sshell_3 = Mat4.translation(-23,-11.9,40).times(Mat4.scale(1, 1, 1));
         this.shapes.small_fan_shell.draw(context, program_state, model_sshell_3, shadow_pass?this.materials.floor.override({color: hex_color('#add8e6')}):this.materials.pure);
         //large fan shell
         let model_lshell = Mat4.translation(-10, -11.9, -14).times(Mat4.scale(4, 4, 4));
