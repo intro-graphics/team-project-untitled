@@ -17,9 +17,9 @@ Everyone has played a basic version of Tetris. Our team wants to improve its gra
 Jingchen Tang & Siyu Qian & Wenjie Mo & Zihao Dong
 
 ## Demo
-### Game play
+#### Game play
 ![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/gameplay.png)
-### game over
+#### game over
 ![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/gameover.png)
 ## Install and Usage
 In a terminal window, run the following commands:
@@ -33,6 +33,7 @@ Then open the browser and type `localhost:8000` in the address line to open this
 
 ## Player guide
 ### Game play
+- The first loading may take up to five seconds due to 3D model loading
 - The game will immediately start when the user enter `localhost:8000`
 - The movemont of blocks could be controlled by arrow keys
   - Move left and right by pressing left and right arrow key
@@ -47,13 +48,20 @@ Then open the browser and type `localhost:8000` in the address line to open this
 ## Advance features and solutions
 ### Shadowing
 The overall interface of the game has a 3D shape which also requires shading and illumination. There will be a shadowing effect on each falling block of Tereis. The shadows will appear at the ground as well as each block below the falling blocks, which enhances the reality aspect of the project. The details of shadowing effects are shown below.
-
+#### Shadowing effects when blocks are on the ground or on other blocks
+![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/stationary_shadow.png)
+#### Shadowing effects when blocks are falling
+![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/falling_shadow.jpeg)
 
 ### Collision Detection
-Since the falling polygon needs to be placed above the existing polygons,  we will use collision detection to detect the intersection of the falling object and the existing objects at the bottom. Once the bottom of the falling object  comes in contact with one of the existing objects, we will stop the motion of the falling object and let it stay in its current position. Collision detection can also be applied to restrict the falling object in a frame. The falling object can only be moved left and right within the frame. The effect of collision detection is presented in Figure 3.
+Since the falling polygon needs to be placed above the existing polygons, we achieved collision detection to detect the intersection of the falling object and the existing objects at the bottom by tracking blocks with a 2D array. Once the bottom of a falling object comes in contact with one of the existing objects, it will stop the motion of the falling object and will stay in its current position. Collision detection can also be applied to restrict the falling object in a frame. The falling object can only be moved left and right within the frame. The effect of collision detection is presented below with a gif image.
+#### Collision detection demo
+![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/collision.gif)
 
 ### Physics-based simulation
-The downward acceleration of blocks when pressed down button will be based on the real world acceleration. Also, when the blocks touch each other, there will be a light bounce effect which will be based on our physics modeling of the blocks.
+The downward acceleration of blocks when pressed down button will be based on the real world acceleration. Two kinds of different accelerations could be applied by pressing 'switch drop style' button in control panel. The effect of Physics-based simulation is presented below with a gif image.
+#### Acceleration of falling blocks
+![](https://github.com/intro-graphics/team-project-untitled/raw/master/assets/physics.gif)
 
 ## References
 [Softbody Tetris](www.youtube.com/watch?v=RfNlhw8FK74)
