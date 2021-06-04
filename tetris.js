@@ -454,21 +454,24 @@ export class Tetris extends Scene {
         let model_chair4 = Mat4.translation(-30,-7.8,20).times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
         this.shapes.chair.draw(context, program_state, model_chair4,shadow_pass?this.materials.chair2:this.materials.pure);
         //tinker
-        let model_tinker = Mat4.translation(-18,-10,18).times(Mat4.rotation(-Math.PI / 2, 1, 0, 0)).times(Mat4.scale(2, 2, 2));
+        let model_tinker = Mat4.translation(-18,-11,18).times(Mat4.rotation(-Math.PI / 2, 1, 0, 0)).times(Mat4.scale(2, 2, 2));
         this.shapes.tinker.draw(context, program_state, model_tinker,shadow_pass?this.materials.sand:this.materials.pure);
         //starfish
-        let model_fish = Mat4.translation(-10,-10,25).times(Mat4.scale(1, 1, 1));
+        let model_fish = Mat4.translation(-10,-11.9,25).times(Mat4.scale(1, 1, 1));
         this.shapes.starfish.draw(context, program_state, model_fish,shadow_pass?this.materials.floor:this.materials.pure);
         //turtle
-        let model_turtle = Mat4.translation(6,-10,20).times(Mat4.rotation(Math.PI*(135/180), 0, 1, 0)).times(Mat4.scale(3, 3, 3));
+        let model_turtle = Mat4.translation(6,-11,20).times(Mat4.rotation(Math.PI*(135/180), 0, 1, 0)).times(Mat4.scale(3, 3, 3));
         this.shapes.turtle.draw(context, program_state, model_turtle,shadow_pass?this.materials.floor:this.materials.pure);
         //get from this.shapes
         //small fan shell
-
+        let model_sshell = Mat4.translation(6, -11.9, -12).times(Mat4.scale(2, 2, 2));
+        this.shapes.small_fan_shell.draw(context, program_state, model_sshell, shadow_pass?this.materials.floor:this.materials.pure);
         //large fan shell
-
+        let model_lshell = Mat4.translation(-10, -11.9, -10).times(Mat4.scale(2, 2, 2));
+        this.shapes.big_fan_shell.draw(context, program_state, model_lshell, shadow_pass?this.materials.floor:this.materials.pure);
         //spiral shell
-
+        let model_spiral = Mat4.translation(15, -11, 25);
+        this.shapes.spiral_shell.draw(context, program_state, model_spiral, shadow_pass?this.materials.floor:this.materials.pure);
         //sand dollor
     }
 
@@ -695,7 +698,7 @@ export class Tetris extends Scene {
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             this.children.push(new defs.Program_State_Viewer());
-            program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
+            program_state.set_camera(Mat4.translation(0, -5, -75));    // Locate the camera here (inverted matrix).
         }
         this.light_position = Mat4.identity().times(vec4(-1, 20, 30, 1));
        
