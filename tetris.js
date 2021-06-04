@@ -74,7 +74,7 @@ export class Tetris extends Scene {
             'square': new defs.Square(),
             'sun': new defs.Subdivision_Sphere(4),
             'chair':new Shape_From_File("assets/chair.obj"),
-            'umbrella': new Shape_From_File("assets/umbrella.obj")
+            'umbrella': new Shape_From_File("assets/umbrella.obj"),
             'tinker':new Shape_From_File("assets/tinker.obj"),
             'starfish':new Shape_From_File("assets/StarFish.obj"),
             'turtle':new Shape_From_File("assets/turtle.obj"),
@@ -82,6 +82,7 @@ export class Tetris extends Scene {
             'big_fan_shell':new Shape_From_File("assets/SmallFanShell.obj"),
             'sand_dollar':new Shape_From_File("assets/SandDollar.obj"),
             'spiral_shell':new Shape_From_File("assets/SpiralShell.obj"),
+        }
 
         this.shape_t =
             {
@@ -423,12 +424,10 @@ export class Tetris extends Scene {
 
         this.shapes.cube.draw(context, program_state, model_trans_floor,
             shadow_pass?this.materials.sand:this.materials.pure);
-        let model_chair = Mat4.translation(40,-7.8,-10).times(Mat4.rotation(-Math.PI / 4, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
-        this.shapes.chair.draw(context, program_state, model_chair,
-            this.materials.chair);
-        let model_umb = Mat4.translation(38,25,-10).times(Mat4.rotation(-Math.PI / 2, 1, 0, 0)).times(Mat4.scale(7, 7, 7));
+
+        let model_umb = Mat4.translation(45,18,-18).times(Mat4.rotation(-Math.PI / 2, 1, 0, 0)).times(Mat4.scale(7, 7, 7));
         this.shapes.umbrella.draw(context, program_state, model_umb,
-            this.materials.umbrella);
+            shadow_pass?this.materials.umbrella:this.materials.pure);
 
         //chairs
         let model_chair = Mat4.translation(35,-7.8,-10).times(Mat4.rotation(-Math.PI / 4, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
@@ -694,7 +693,7 @@ export class Tetris extends Scene {
             this.children.push(new defs.Program_State_Viewer());
             program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
         }
-        this.light_position = Mat4.identity().times(vec4(-1, 40, 20, 1));
+        this.light_position = Mat4.identity().times(vec4(-1, 20, 30, 1));
        
         this.light_color = color(1,1,1,1);
 
