@@ -180,7 +180,6 @@ export class Tetris extends Scene {
         this.show_light = false
         this.grid = this.initGrid();
         this.addNext = true;
-        this.scroll = true;
         this.falling = {r:0,c:9,pos:this.shape_t.ZShape,color_i:0}
         this.complete = false
         this.over = false;
@@ -393,10 +392,6 @@ export class Tetris extends Scene {
             this.complete = !this.complete
 
         });
-        this.key_triggered_button("Scrolling ocean", ["x"], () => {
-            this.scroll = !this.scroll;
-
-        });
     }
 
     resetFallingShape(){
@@ -486,9 +481,6 @@ export class Tetris extends Scene {
             shadow_pass? this.materials.sky:this.materials.pure);
         //back
         let sea_material = this.materials.scroll_tex
-        if(!this.scroll){
-            sea_material = this.materials.sea;
-        }
         this.shapes.cube.draw(context, program_state, Mat4.translation(0, 28, -45)
                 .times(Mat4.scale(70, 40, 0.01)),
             shadow_pass? sea_material:this.materials.pure);
