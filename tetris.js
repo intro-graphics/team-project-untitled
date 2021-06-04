@@ -75,7 +75,13 @@ export class Tetris extends Scene {
             'sun': new defs.Subdivision_Sphere(4),
             'chair':new Shape_From_File("assets/chair.obj"),
             'umbrella': new Shape_From_File("assets/umbrella.obj")
-        };
+            'tinker':new Shape_From_File("assets/tinker.obj"),
+            'starfish':new Shape_From_File("assets/StarFish.obj"),
+            'turtle':new Shape_From_File("assets/turtle.obj"),
+            'small_fan_shell':new Shape_From_File("assets/SmallFanShell.obj"),
+            'big_fan_shell':new Shape_From_File("assets/SmallFanShell.obj"),
+            'sand_dollar':new Shape_From_File("assets/SandDollar.obj"),
+            'spiral_shell':new Shape_From_File("assets/SpiralShell.obj"),
 
         this.shape_t =
             {
@@ -94,6 +100,7 @@ export class Tetris extends Scene {
         this.materials = {
             plastic: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 1, specularity: 0.7, color: color(1,1,1,1)}),
+            
             floor : new Material(new Shadow_Textured_Phong_Shader(1), {
                 color: color(0.5, 1, 1, 1), ambient: 0.4, diffusivity: 0.6,
                 color_texture: null,
@@ -110,11 +117,12 @@ export class Tetris extends Scene {
             light_src : new Material(new Phong_Shader(), {
                 color: color(1, 1, 1, 1), ambient: 1, diffusivity: 0, specularity: 0
             }),
+            
             ground: new Material(new Shadow_Textured_Phong_Shader(1), {
                 color: hex_color('#000000'),
                 ambient: 0.7, color_texture: new Texture("./assets/stars.png"),light_depth_texture: null
             }),
-            sand: new Material(new Shadow_Textured_Phong_Shader(1), {
+            sand: new Material(new Shadow_Textured_Phong_Shader(4), {
                 color: hex_color('#c2b280'),ambient: .4, diffusivity: 0.8, specularity: 0,
                     color_texture: new Texture("assets/sand.jpg"),
                     light_depth_texture: null
@@ -123,23 +131,23 @@ export class Tetris extends Scene {
                 ambient: 1, diffusivity: 0, specularity: 0,
                 texture: new Texture("assets/text.png")
             }),
-            // towel:new Material(new Textured_Phong(),
-            //     {ambient: 0.8, diffusivity: 0.3, specularity: 0.3,
-            //     texture: new Texture("assets/towel_pink.jpg")
-            // }),
-            //towel: await this.load_file('./assets/towel.mtl'),
+            
             stone: new Material(new Textured_Phong(),
                 {ambient: 0.8, diffusivity: 1, 
                 texture: new Texture("assets/marble2.jpeg")
             }),
-            chair: new Material(new Textured_Phong(),
-                {ambient: 1, diffusivity: 1, specularity: 1,
-                texture: new Texture("assets/chair.jpg")
+            chair: new Material(new Shadow_Textured_Phong_Shader(1),
+                {ambient: 1, diffusivity: 0.8, specularity: 1,
+                color_texture: new Texture("assets/chair.jpg"),light_depth_texture: null
             }),
             umbrella: new Material(new Textured_Phong(),
                 {ambient: 1, diffusivity: 1, specularity: 1,
                     texture: new Texture("assets/umbrella_1.jpg")
                 }),
+            chair2: new Material(new Shadow_Textured_Phong_Shader(1),
+            {ambient: 1, diffusivity: 1, specularity: 1,
+            color_texture: new Texture("assets/chair2.jpg"),light_depth_texture: null
+        }),
 
             sea: new Material(new Shadow_Textured_Phong_Shader(1), {
                 diffusivity: 1, specularity: 0.8,
@@ -411,7 +419,7 @@ export class Tetris extends Scene {
             }
         }
         //ground for shadowing
-        let model_trans_floor = Mat4.translation(0,-12,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01));
+        let model_trans_floor = Mat4.translation(0,-12,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 45, 0.01));
 
         this.shapes.cube.draw(context, program_state, model_trans_floor,
             shadow_pass?this.materials.sand:this.materials.pure);
@@ -422,6 +430,34 @@ export class Tetris extends Scene {
         this.shapes.umbrella.draw(context, program_state, model_umb,
             this.materials.umbrella);
 
+        //chairs
+        let model_chair = Mat4.translation(35,-7.8,-10).times(Mat4.rotation(-Math.PI / 4, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
+        this.shapes.chair.draw(context, program_state, model_chair,shadow_pass?this.materials.chair:this.materials.pure);
+        
+        let model_chair2 = Mat4.translation(38,-7.8,3).times(Mat4.rotation(-Math.PI / 4, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
+        this.shapes.chair.draw(context, program_state, model_chair2,shadow_pass?this.materials.chair2:this.materials.pure);
+
+        let model_chair3 = Mat4.translation(-34,-7.8,3).times(Mat4.rotation(Math.PI / 4, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
+        this.shapes.chair.draw(context, program_state, model_chair3,shadow_pass?this.materials.chair2:this.materials.pure);
+        let model_chair4 = Mat4.translation(-30,-7.8,20).times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(5, 5, 5));
+        this.shapes.chair.draw(context, program_state, model_chair4,shadow_pass?this.materials.chair2:this.materials.pure);
+        //tinker
+        let model_tinker = Mat4.translation(-18,-10,18).times(Mat4.rotation(-Math.PI / 2, 1, 0, 0)).times(Mat4.scale(2, 2, 2));
+        this.shapes.tinker.draw(context, program_state, model_tinker,shadow_pass?this.materials.sand:this.materials.pure);
+        //starfish
+        let model_fish = Mat4.translation(-10,-10,25).times(Mat4.scale(1, 1, 1));
+        this.shapes.starfish.draw(context, program_state, model_fish,shadow_pass?this.materials.floor:this.materials.pure);
+        //turtle
+        let model_turtle = Mat4.translation(6,-10,20).times(Mat4.rotation(Math.PI*(135/180), 0, 1, 0)).times(Mat4.scale(3, 3, 3));
+        this.shapes.turtle.draw(context, program_state, model_turtle,shadow_pass?this.materials.floor:this.materials.pure);
+        //get from this.shapes
+        //small fan shell
+
+        //large fan shell
+
+        //spiral shell
+
+        //sand dollor
     }
 
     draw_background(context, program_state,shadow_pass){
@@ -439,16 +475,16 @@ export class Tetris extends Scene {
                 .times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 70, 0.01)),
             shadow_pass? this.materials.sky:this.materials.pure);
         //back
-        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 28, -70)
+        this.shapes.cube.draw(context, program_state, Mat4.translation(0, 28, -45)
                 .times(Mat4.scale(70, 40, 0.01)),
             shadow_pass? this.materials.sea:this.materials.pure);
         //left
         this.shapes.cube.draw(context, program_state, Mat4.translation(-70, 28, 0)
-                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 40, 0.01)),
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(45, 40, 0.01)),
             shadow_pass? this.materials.sea:this.materials.pure);
         //right
         this.shapes.cube.draw(context, program_state, Mat4.translation(70, 28, 0)
-                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(70, 40, 0.01)),
+                .times(Mat4.rotation(Math.PI / 2, 0, 1, 0)).times(Mat4.scale(45, 40, 0.01)),
             shadow_pass? this.materials.sea:this.materials.pure);
     }
 
@@ -578,6 +614,7 @@ export class Tetris extends Scene {
             this.shapes.sun.draw(context, program_state,
                 Mat4.translation(light_position[0], light_position[1], light_position[2]),
                 this.materials.sun);
+                
         }
         this.draw_frame(context, program_state,shadow_pass);
         this.draw_background(context, program_state,shadow_pass);
@@ -658,6 +695,7 @@ export class Tetris extends Scene {
             program_state.set_camera(Mat4.translation(0, -5, -65));    // Locate the camera here (inverted matrix).
         }
         this.light_position = Mat4.identity().times(vec4(-1, 40, 20, 1));
+       
         this.light_color = color(1,1,1,1);
 
 
