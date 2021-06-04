@@ -103,7 +103,7 @@ export class Tetris extends Scene {
                 {ambient: 1, diffusivity: 1, specularity: 0.7, color: color(1,1,1,1)}),
             
             floor : new Material(new Shadow_Textured_Phong_Shader(1), {
-                color: color(0.5, 1, 1, 1), ambient: 0.4, diffusivity: 0.6,
+                color: color(0.5, 1, 1, 1), ambient: 0.6, diffusivity: 0.6,
                 color_texture: null,
                 light_depth_texture: null
             }),
@@ -432,7 +432,7 @@ export class Tetris extends Scene {
             }
         }
         //ground for shadowing
-        let model_trans_floor = Mat4.translation(0,-12,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 45, 0.01));
+        let model_trans_floor = Mat4.translation(0,-13,0).times(Mat4.rotation(Math.PI / 2, 1, 0, 0)).times(Mat4.scale(70, 45, 1));
 
         this.shapes.cube.draw(context, program_state, model_trans_floor,
             shadow_pass?this.materials.sand:this.materials.pure);
@@ -457,21 +457,28 @@ export class Tetris extends Scene {
         this.shapes.tinker.draw(context, program_state, model_tinker,shadow_pass?this.materials.sand:this.materials.pure);
         //starfish
         let model_fish = Mat4.translation(-10,-11.9,25).times(Mat4.scale(1, 1, 1));
-        this.shapes.starfish.draw(context, program_state, model_fish,shadow_pass?this.materials.floor:this.materials.pure);
+        this.shapes.starfish.draw(context, program_state, model_fish,shadow_pass?this.materials.floor.override({color: hex_color('#FF0000')}):this.materials.pure);
         //turtle
         let model_turtle = Mat4.translation(6,-11,20).times(Mat4.rotation(Math.PI*(135/180), 0, 1, 0)).times(Mat4.scale(3, 3, 3));
-        this.shapes.turtle.draw(context, program_state, model_turtle,shadow_pass?this.materials.floor:this.materials.pure);
+        this.shapes.turtle.draw(context, program_state, model_turtle,shadow_pass?this.materials.floor.override({color: hex_color('#64584A')}):this.materials.pure);
         //get from this.shapes
-        //small fan shell
-        let model_sshell = Mat4.translation(6, -11.9, -12).times(Mat4.scale(2, 2, 2));
-        this.shapes.small_fan_shell.draw(context, program_state, model_sshell, shadow_pass?this.materials.floor:this.materials.pure);
+       //spiral shell
+        let model_sshell = Mat4.translation(6, -11.9, -20).times(Mat4.rotation(Math.PI*(135/180), 0, 1, 0)).times(Mat4.scale(1.5, 1.5, 1.5));
+        this.shapes.spiral_shell.draw(context, program_state, model_sshell, shadow_pass?this.materials.floor.override({color: color(1,1,1,1)}):this.materials.pure);
+        let model_sshell_2 = Mat4.translation(30,-10.5,25).times(Mat4.scale(1, 1, 1));
+        this.shapes.spiral_shell.draw(context, program_state, model_sshell_2, shadow_pass?this.materials.floor.override({color: hex_color('#A15168')}):this.materials.pure);
+        let model_sshell_3 = Mat4.translation(-23,-10.5,40).times(Mat4.scale(1, 1, 1));
+        this.shapes.small_fan_shell.draw(context, program_state, model_sshell_3, shadow_pass?this.materials.floor.override({color: hex_color('#add8e6')}):this.materials.pure);
         //large fan shell
-        let model_lshell = Mat4.translation(-10, -11.9, -10).times(Mat4.scale(2, 2, 2));
-        this.shapes.big_fan_shell.draw(context, program_state, model_lshell, shadow_pass?this.materials.floor:this.materials.pure);
-        //spiral shell
-        let model_spiral = Mat4.translation(15, -11, 25);
-        this.shapes.spiral_shell.draw(context, program_state, model_spiral, shadow_pass?this.materials.floor:this.materials.pure);
+        let model_lshell = Mat4.translation(-10, -11.9, -14).times(Mat4.scale(4, 4, 4));
+        this.shapes.big_fan_shell.draw(context, program_state, model_lshell, shadow_pass?this.materials.floor.override({color: hex_color('#98A0BB')}):this.materials.pure);
+         //small fan shell
+        let model_spiral = Mat4.translation(15, -11.9, 25).times(Mat4.scale(2, 2, 2));;
+        this.shapes.small_fan_shell.draw(context, program_state, model_spiral, shadow_pass?this.materials.floor.override({color: hex_color('#95B28F')}):this.materials.pure);
+        
         //sand dollor
+        let model_dollar = Mat4.translation(-3, -11.9, 35).times(Mat4.scale(2, 2, 2));;
+        this.shapes.sand_dollar.draw(context, program_state, model_dollar, shadow_pass?this.materials.floor.override({color: hex_color('#B6A98B')}):this.materials.pure);
     }
 
     draw_background(context, program_state,shadow_pass){
